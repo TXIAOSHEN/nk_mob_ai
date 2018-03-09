@@ -13,6 +13,7 @@ import me.onebone.actaeon.entity.animal.Cow;
 import me.onebone.actaeon.entity.animal.Pig;
 import me.onebone.actaeon.entity.animal.Sheep;
 import me.onebone.actaeon.entity.monster.Zombie;
+import me.onebone.actaeon.entity.monster.evoker.GraveEvokerBoss;
 
 public class Actaeon extends PluginBase implements Listener{
 
@@ -30,11 +31,12 @@ public class Actaeon extends PluginBase implements Listener{
 	public void onEnable(){
 		this.saveDefaultConfig();
 
-		this.registerEntity("Sheep", Sheep.class);
-		this.registerEntity("Cow", Cow.class);
-		this.registerEntity("Chicken", Chicken.class);
-		this.registerEntity("Pig", Pig.class);
+		//this.registerEntity("Sheep", Sheep.class);
+		//this.registerEntity("Cow", Cow.class);
+		//this.registerEntity("Chicken", Chicken.class);
+		//this.registerEntity("Pig", Pig.class);
 		this.registerEntity("Zombie", Zombie.class);
+		this.registerEntity("Evoker", GraveEvokerBoss.class);
 
 		Item.addCreativeItem(Item.get(Item.SPAWN_EGG, Zombie.NETWORK_ID));
 
@@ -49,6 +51,7 @@ public class Actaeon extends PluginBase implements Listener{
 		Item.addCreativeItem(Item.get(Item.SPAWN_EGG, 24));
 		Item.addCreativeItem(Item.get(Item.SPAWN_EGG, 25));
 		Item.addCreativeItem(Item.get(Item.SPAWN_EGG, 28));
+		Item.addCreativeItem(Item.get(Item.SPAWN_EGG, GraveEvokerBoss.NETWORK_ID));
 		//this.getServer().getPluginManager().registerEvents(this, this);
 	}
 

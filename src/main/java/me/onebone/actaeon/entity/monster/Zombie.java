@@ -9,7 +9,7 @@ import me.onebone.actaeon.entity.Fallable;
 import me.onebone.actaeon.hook.AttackHook;
 import me.onebone.actaeon.target.AreaHaterTargetFinder;
 
-public class Zombie extends Monster implements EntityAgeable, Fallable, Climbable{
+public class Zombie extends Monster implements EntityAgeable, Fallable{
 	public static final int NETWORK_ID = 32;
 
 	public Zombie(FullChunk chunk, CompoundTag nbt) {

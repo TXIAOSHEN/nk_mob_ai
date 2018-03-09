@@ -1,5 +1,6 @@
 package me.onebone.actaeon.entity;
 
+import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.entity.Attribute;
 import cn.nukkit.entity.Entity;
@@ -97,7 +98,7 @@ abstract public class MovingEntity extends EntityCreature{
 		if (this.targetFinder != null) this.targetFinder.onUpdate();
 
 		if(this.routeLeading && this.onGround && this.hasSetTarget() && !this.route.isSearching() && System.currentTimeMillis() >= this.route.stopRouteFindUntil && (this.route.getDestination() == null || this.route.getDestination().distance(this.getTarget()) > 2)){ // 대상이 이동함
-            Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox));
+            if (RouteFinderSearchAsyncTask.getTaskSize() < 50) Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox));
 
 			/*if(this.route.isSearching()) this.route.research();
 			else this.route.search();*/
@@ -111,7 +112,7 @@ abstract public class MovingEntity extends EntityCreature{
 
 				Node node = this.route.get();
 				if(node != null){
-					//level.addParticle(new cn.nukkit.level.particle.RedstoneParticle(node.getVector3(), 2));
+					//Server.broadcastPacket(level.getPlayers().values().stream().toArray(Player[]::new), new cn.nukkit.level.particle.RedstoneParticle(node.getVector3(), 2).encode()[0]);
 					Vector3 vec = node.getVector3();
 					double diffX = Math.pow(vec.x - this.x, 2);
 					double diffZ = Math.pow(vec.z - this.z, 2);

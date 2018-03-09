@@ -1,15 +1,10 @@
 package me.onebone.actaeon.route;
 
-import cn.nukkit.Server;
 import cn.nukkit.block.Block;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.particle.FlameParticle;
-import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
 
 import java.util.*;
-import java.util.concurrent.LinkedBlockingDeque;
 
 public class WalkableIterator implements Iterator<Block> {
     private final Level level;
@@ -22,7 +17,11 @@ public class WalkableIterator implements Iterator<Block> {
 
     private double currentDistance;
     private Vector3 startPosition;
+    private Vector3 startPositionLeft;
+    private Vector3 startPositionRight;
     private Vector3 currentPosition = null;
+    private Vector3 currentPositionLeft = null;
+    private Vector3 currentPositionRight = null;
     private Vector3 direction = null;
 
     private AdvancedRouteFinder advancedRouteFinder;
@@ -33,13 +32,24 @@ public class WalkableIterator implements Iterator<Block> {
         this.width = width;
         this.maxDistance = maxDistance == 0 ? 120 : maxDistance;
         this.currentDistance = 0;
-        this.currentPosition = start.clone();
-        this.startPosition = start.clone();
         this.direction = direction.normalize();
+        this.currentPosition = start;
+        //this.currentPositionLeft = this.getStartPos(start, -width / 2);
+        //this.currentPositionRight = this.getStartPos(start, width / 2);
+        this.startPosition = this.currentPosition.clone();
+        //this.startPositionLeft = this.currentPositionLeft.clone();
+        //this.startPositionRight = this.currentPositionRight.clone();
     }
 
-    public Vector3 getCurrentPosition() {
-        return currentPosition;
+    private Vector3 getStartPos(Vector3 center, double xOffset) {
+        double angle = Math.atan2(this.direction.z, this.direction.x);
+        double yaw = (float) ((angle * 180) / Math.PI) - 90;
+        double baseX = xOffset;
+        double baseZ = 0;
+        double a = Math.toRadians(yaw);
+        double x = baseX * Math.cos(a) - baseZ * Math.sin(a);
+        double z = baseX * Math.sin(a) + baseZ * Math.cos(a);
+        return new Vector3(center.x + x, center.y, center.z + z);
     }
 
     @Override
@@ -60,16 +70,50 @@ public class WalkableIterator implements Iterator<Block> {
         }
         if (this.end) return;
 
+        List<Vector3> checked = new ArrayList<>();
         do {
-            //if (this.currentDistance > 2 && new Random().nextInt(100) < 35) this.level.addParticle(new FlameParticle(this.currentPosition));
-            Block block = this.level.getBlock(this.currentPosition);
+            //Middle
+            Vector3 check;
             Vector3 next = this.currentPosition.add(this.direction);
-            double walkable = this.advancedRouteFinder.isWalkableAt(block);
-            if (walkable != 0 || (block.getBoundingBox() != null && block.getBoundingBox().calculateIntercept(this.currentPosition, next) != null)) {
-                this.currentBlockObject = block;
-                this.end = true;
+            if (!checked.contains(check = this.currentPosition.floor())) {
+                Block block = this.level.getBlock(check);
+                double walkable = this.advancedRouteFinder.isWalkableAt(block);
+                //Server.getInstance().getLogger().info(block.getLocation().toString() + " LEFT walkable=" + walkable);
+                if (walkable < 0) {
+                    this.currentBlockObject = block;
+                    this.end = true;
+                }
+                checked.add(check);
             }
             this.currentPosition = next;
+            /*
+            //Left
+            if (!checked.contains(check = this.currentPositionLeft.floor())) {
+                Block block = this.level.getBlock(check);
+                double walkable = this.advancedRouteFinder.isWalkableAt(block);
+                //Server.getInstance().getLogger().info(block.getLocation().toString() + " LEFT walkable=" + walkable);
+                if (walkable < 0) {
+                    this.currentBlockObject = block;
+                    this.end = true;
+                }
+                checked.add(check);
+            }
+            this.currentPositionLeft = next;
+
+            //Right
+            next = this.currentPositionRight.add(this.direction);
+            if (!checked.contains(check = this.currentPositionRight.floor())) {
+                Block block = this.level.getBlock(check);
+                double walkable = this.advancedRouteFinder.isWalkableAt(block);
+                //Server.getInstance().getLogger().info(block.getLocation().toString() + " RIGHT walkable=" + walkable);
+                if (walkable < 0) {
+                    this.currentBlockObject = block;
+                    this.end = true;
+                }
+                checked.add(check);
+            }
+            this.currentPositionRight = next;*/
+
             this.currentDistance = this.currentPosition.distance(this.startPosition);
             if (this.maxDistance > 0 && this.currentDistance > this.maxDistance) this.end = true;
         } while (!this.end);

@@ -1,6 +1,5 @@
 package me.onebone.actaeon.entity;
 
-import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.entity.Attribute;
 import cn.nukkit.entity.Entity;
@@ -10,6 +9,8 @@ import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.UpdateAttributesPacket;
+import co.aikar.timings.Timing;
+import co.aikar.timings.TimingsManager;
 import me.onebone.actaeon.hook.MovingEntityHook;
 import me.onebone.actaeon.route.AdvancedRouteFinder;
 import me.onebone.actaeon.route.Node;
@@ -33,9 +34,19 @@ abstract public class MovingEntity extends EntityCreature{
 	private Map<String, MovingEntityHook> hooks = new HashMap<>();
 	private MovingEntityTask task = null;
 	private boolean lookAtFront = true;
+	private final Timing movingEntityTiming;
+	private final Timing movingEntityPart1Timing;
+	private final Timing movingEntityPart2Timing;
+	private final Timing movingEntityPart3Timing;
+	private final Timing movingEntityPart4Timing;
 
 	public MovingEntity(FullChunk chunk, CompoundTag nbt){
 		super(chunk, nbt);
+		this.movingEntityTiming = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate");
+		this.movingEntityPart1Timing = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate Part1");
+		this.movingEntityPart2Timing = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate Part2");
+		this.movingEntityPart3Timing = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate Part3");
+		this.movingEntityPart4Timing = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate Part4");
 
 		this.route = new AdvancedRouteFinder(this);
 		//this.route = new SimpleRouteFinder(this);
@@ -71,7 +82,9 @@ abstract public class MovingEntity extends EntityCreature{
 
 	@Override
 	public boolean onUpdate(int currentTick) {
+		this.movingEntityTiming.startTiming();
 		super.onUpdate(currentTick);
+		this.movingEntityTiming.stopTiming();
 		return true;
 	}
 
@@ -81,6 +94,7 @@ abstract public class MovingEntity extends EntityCreature{
 			return false;
 		}
 
+		this.movingEntityPart1Timing.startTiming();
 		new ArrayList<>(this.hooks.values()).forEach(hook -> hook.onUpdate(Server.getInstance().getTick()));
 		if (this.task != null) this.task.onUpdate(Server.getInstance().getTick());
 
@@ -95,6 +109,10 @@ abstract public class MovingEntity extends EntityCreature{
 		this.motionX *= (1 - this.getDrag());
 		this.motionZ *= (1 - this.getDrag());
 
+		this.movingEntityPart1Timing.stopTiming();
+
+		this.movingEntityPart2Timing.startTiming();
+
 		if (this.targetFinder != null) this.targetFinder.onUpdate();
 
 		if(this.routeLeading && this.onGround && this.hasSetTarget() && !this.route.isSearching() && System.currentTimeMillis() >= this.route.stopRouteFindUntil && (this.route.getDestination() == null || this.route.getDestination().distance(this.getTarget()) > 2)){ // 대상이 이동함
@@ -106,7 +124,10 @@ abstract public class MovingEntity extends EntityCreature{
 			hasUpdate = true;
 		}
 
+		this.movingEntityPart2Timing.stopTiming();
+
 		if (!this.isImmobile()) {
+			this.movingEntityPart3Timing.startTiming();
 			if(this.routeLeading && !this.isKnockback && !this.route.isSearching() && this.route.isSuccess() && this.route.hasRoute()){ // entity has route to go
 				hasUpdate = true;
 
@@ -144,6 +165,10 @@ abstract public class MovingEntity extends EntityCreature{
 				}
 			}
 
+			this.movingEntityPart3Timing.stopTiming();
+
+			this.movingEntityPart4Timing.startTiming();
+
 			if((this.motionX != 0 || this.motionZ != 0) && this.isCollidedHorizontally){
 				this.jump();
 			}
@@ -157,6 +182,7 @@ abstract public class MovingEntity extends EntityCreature{
 			} else {
 				this.isKnockback = false;
 			}
+			this.movingEntityPart4Timing.stopTiming();
 		}
 
 

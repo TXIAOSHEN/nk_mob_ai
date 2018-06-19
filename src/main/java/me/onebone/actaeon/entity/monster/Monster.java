@@ -4,7 +4,9 @@ import cn.nukkit.Player;
 import cn.nukkit.entity.Attribute;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityAgeable;
+import cn.nukkit.entity.EntityHuman;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.AddEntityPacket;
 import cn.nukkit.network.protocol.UpdateAttributesPacket;
@@ -48,5 +50,12 @@ abstract public class Monster extends MovingEntity implements EntityAgeable{
 		player.dataPacket(pk0);
 
 		super.spawnTo(player);
+	}
+
+	@Override
+	public void onCollideWithPlayer(EntityHuman entityPlayer) {
+		Vector3 motion = this.subtract(entityPlayer);
+		this.motionX += motion.x / 2;
+		this.motionZ += motion.z / 2;
 	}
 }

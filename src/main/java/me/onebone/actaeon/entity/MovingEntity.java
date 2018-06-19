@@ -4,6 +4,7 @@ import cn.nukkit.Server;
 import cn.nukkit.entity.Attribute;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
+import cn.nukkit.entity.EntityHuman;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
@@ -34,6 +35,7 @@ abstract public class MovingEntity extends EntityCreature{
 	private Map<String, MovingEntityHook> hooks = new HashMap<>();
 	private MovingEntityTask task = null;
 	private boolean lookAtFront = true;
+	private boolean autoCollide = true;
 	private final Timing movingEntityTiming;
 	private final Timing movingEntityPart1Timing;
 	private final Timing movingEntityPart2Timing;
@@ -159,9 +161,12 @@ abstract public class MovingEntity extends EntityCreature{
 
 			for (Entity entity: this.getLevel().getCollidingEntities(this.boundingBox)) {
 				if (this.canCollide() && this.canCollideWith(entity)) {
-					Vector3 motion = this.subtract(entity);
-					this.motionX += motion.x / 2;
-					this.motionZ += motion.z / 2;
+					if (entity instanceof EntityHuman) this.onCollideWithPlayer((EntityHuman) entity);
+					if (autoCollide) {
+						Vector3 motion = this.subtract(entity);
+						this.motionX += motion.x / 2;
+						this.motionZ += motion.z / 2;
+					}
 				}
 			}
 
@@ -329,5 +334,12 @@ abstract public class MovingEntity extends EntityCreature{
 		this.lookAtFront = lookAtFront;
 	}
 
+	public boolean isAutoCollide() {
+		return autoCollide;
+	}
+
+	public void setAutoCollide(boolean autoCollide) {
+		this.autoCollide = autoCollide;
+	}
 }
 

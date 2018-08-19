@@ -110,6 +110,8 @@ abstract public class MovingEntity extends EntityCreature{
 
 		this.motionX *= (1 - this.getDrag());
 		this.motionZ *= (1 - this.getDrag());
+		if (this.motionX < 0.001 && this.motionX > -0.001) this.motionX = 0;
+		if (this.motionZ < 0.001 && this.motionZ > -0.001) this.motionZ = 0;
 
 		this.movingEntityPart1Timing.stopTiming();
 
@@ -145,7 +147,7 @@ abstract public class MovingEntity extends EntityCreature{
 							this.route.arrived();
 							//Server.getInstance().getLogger().warning(vec.toString());
 						}
-					}else{
+					} else {
 						int negX = vec.x - this.x < 0 ? -1 : 1;
 						int negZ = vec.z - this.z < 0 ? -1 : 1;
 

@@ -14,6 +14,7 @@ import java.util.Random;
  */
 public class AttackHook extends MovingEntityHook {
 
+    private Entity parentEntity;
     private long lastAttack = 0;
     private double attackDistance;
     private long coolDown;
@@ -27,7 +28,12 @@ public class AttackHook extends MovingEntityHook {
     }
 
     public AttackHook(MovingEntity bot, double attackDistance, float damage, long coolDown, int effectual, double viewAngle) {
+        this(bot, null, attackDistance, damage, coolDown, effectual, viewAngle);
+    }
+
+    public AttackHook(MovingEntity bot, Entity parentEntity, double attackDistance, float damage, long coolDown, int effectual, double viewAngle) {
         super(bot);
+        this.parentEntity = parentEntity;
         this.attackDistance = attackDistance;
         this.damage = damage;
         this.coolDown = coolDown;
@@ -71,7 +77,7 @@ public class AttackHook extends MovingEntityHook {
             if (this.entity.distance(hate) <= this.attackDistance) {
                 if (System.currentTimeMillis() - this.lastAttack > this.coolDown) {
                     if (this.entity.getTask() == null) {
-                        this.entity.updateBotTask(new AttackTask(this.entity, hate, this.damage, this.viewAngle, new Random().nextInt(10) < this.effectual));
+                        this.entity.updateBotTask(new AttackTask(this.entity, this.parentEntity, hate, this.damage, this.viewAngle, new Random().nextInt(10) < this.effectual));
                     }
                     this.lastAttack = System.currentTimeMillis();
                     if (this.jump && new Random().nextBoolean()) this.entity.jump();

@@ -2,6 +2,7 @@ package me.onebone.actaeon.task;
 
 import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
+import cn.nukkit.event.entity.EntityDamageByChildEntityEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.network.protocol.AnimatePacket;
@@ -16,13 +17,19 @@ import me.onebone.actaeon.entity.MovingEntity;
  */
 public class AttackTask extends MovingEntityTask {
 
-    private Entity target;
-    private float damage;
-    private double viewAngle;
-    private boolean effectual;
+    private final Entity parentEntity;
+    private final Entity target;
+    private final float damage;
+    private final double viewAngle;
+    private final boolean effectual;
 
     public AttackTask(MovingEntity entity, Entity target, float damage, double viewAngle, boolean effectual) {
+        this(entity, null, target, damage, viewAngle, effectual);
+    }
+
+    public AttackTask(MovingEntity entity, Entity parentEntity, Entity target, float damage, double viewAngle, boolean effectual) {
         super(entity);
+        this.parentEntity = parentEntity;
         this.target = target;
         this.damage = damage;
         this.viewAngle = viewAngle;
@@ -45,7 +52,13 @@ public class AttackTask extends MovingEntityTask {
         }
         if (valid && this.effectual) {
             if (this.target.noDamageTicks <= 0) {
-                this.target.attack(new EntityDamageByEntityEvent(this.getEntity(), this.target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage));
+                EntityDamageByEntityEvent event;
+                if (this.parentEntity != null) {
+                    event = new EntityDamageByChildEntityEvent(this.parentEntity, this.getEntity(), this.target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage);
+                } else {
+                    event = new EntityDamageByEntityEvent(this.getEntity(), this.target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage);
+                }
+                this.target.attack(event);
                 this.target.noDamageTicks = 10;
             }
         }

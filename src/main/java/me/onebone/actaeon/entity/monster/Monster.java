@@ -54,8 +54,10 @@ abstract public class Monster extends MovingEntity implements EntityAgeable{
 
 	@Override
 	public void onCollideWithPlayer(EntityHuman entityPlayer) {
-		Vector3 motion = this.subtract(entityPlayer);
-		this.motionX += motion.x / 2;
-		this.motionZ += motion.z / 2;
+		if (!entityPlayer.getDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_INVISIBLE)) {
+			Vector3 motion = this.subtract(entityPlayer);
+			this.motionX += motion.x / 2;
+			this.motionZ += motion.z / 2;
+		}
 	}
 }

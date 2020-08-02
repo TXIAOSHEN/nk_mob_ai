@@ -4,6 +4,8 @@ import cn.nukkit.entity.Entity;
 import me.onebone.actaeon.entity.MovingEntity;
 import me.onebone.actaeon.task.AttackTask;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -22,6 +24,7 @@ public class AttackHook extends MovingEntityHook {
     private double viewAngle;  //机器人视野范围（攻击有效范围）
     private boolean jump;  //是否自动跳劈
     private float damage;
+    private final List<AttackTask.AttackCallback> callbacks = new ArrayList<>();
 
     public AttackHook(MovingEntity entity) {
         this(entity, 2.6, 2, 250, 6, 75);
@@ -70,6 +73,11 @@ public class AttackHook extends MovingEntityHook {
         return this;
     }
 
+    public AttackHook addAttackCallback(AttackTask.AttackCallback callback) {
+        this.callbacks.add(callback);
+        return this;
+    }
+
     @Override
     public void onUpdate(int tick) {
         if (this.entity.getHate() != null) {
@@ -77,7 +85,7 @@ public class AttackHook extends MovingEntityHook {
             if (this.entity.distance(hate) <= this.attackDistance) {
                 if (System.currentTimeMillis() - this.lastAttack > this.coolDown) {
                     if (this.entity.getTask() == null) {
-                        this.entity.updateBotTask(new AttackTask(this.entity, this.parentEntity, hate, this.damage, this.viewAngle, new Random().nextInt(10) < this.effectual));
+                        this.entity.updateBotTask(new AttackTask(this.entity, this.parentEntity, hate, this.damage, this.viewAngle, new Random().nextInt(10) < this.effectual, this.callbacks));
                     }
                     this.lastAttack = System.currentTimeMillis();
                     if (this.jump && new Random().nextBoolean()) this.entity.jump();

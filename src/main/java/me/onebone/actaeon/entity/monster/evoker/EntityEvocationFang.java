@@ -10,6 +10,7 @@ import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.AddEntityPacket;
+import cn.nukkit.network.protocol.EntityEventPacket;
 
 /**
  * net.easecation.ecgrave.entity
@@ -71,6 +72,11 @@ public class EntityEvocationFang extends Entity {
                 for (Entity entity: entities) {
                     if (entity != this.owner) entity.attack(new EntityDamageByChildEntityEvent(this.owner, this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage));
                 }
+
+                EntityEventPacket pk = new EntityEventPacket();
+                pk.eid = this.getId();
+                pk.event = 4;
+                Server.broadcastPacket(this.hasSpawned.values().toArray(new Player[0]), pk);
             } else if (this.age >= 40) {
                 this.kill();
                 this.close();

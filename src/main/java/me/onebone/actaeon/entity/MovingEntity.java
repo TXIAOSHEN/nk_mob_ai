@@ -32,7 +32,7 @@ abstract public class MovingEntity extends EntityCreature{
 	private Entity hate = null;
 	private String targetSetter = "";
 	public boolean routeLeading = true;
-	private Map<String, MovingEntityHook> hooks = new HashMap<>();
+	private final Map<String, MovingEntityHook> hooks = new HashMap<>();
 	private MovingEntityTask task = null;
 	private boolean lookAtFront = true;
 	private boolean autoCollide = true;

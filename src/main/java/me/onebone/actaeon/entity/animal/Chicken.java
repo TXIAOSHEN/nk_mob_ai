@@ -1,11 +1,8 @@
 package me.onebone.actaeon.entity.animal;
 
-import cn.nukkit.Player;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityAgeable;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.nbt.tag.CompoundTag;
 import me.onebone.actaeon.entity.Fallable;
 import me.onebone.actaeon.target.AreaPlayerHoldTargetFinder;
@@ -46,7 +43,7 @@ public class Chicken extends Animal implements EntityAgeable, Fallable{
 
 	@Override
 	public Item[] getDrops(){
-		return new Item[]{Item.get(Item.RAW_CHICKEN), Item.get(Item.FEATHER)};
+		return new Item[]{Item.get(Item.CHICKEN), Item.get(Item.FEATHER)};
 	}
 
 	@Override

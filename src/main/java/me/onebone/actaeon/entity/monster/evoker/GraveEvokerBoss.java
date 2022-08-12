@@ -43,7 +43,7 @@ public class GraveEvokerBoss extends Monster implements EntityAgeable, Fallable,
 
     @Override
     public Item[] getDrops() {
-        return new Item[]{Item.get(Item.GOLDEN_APPLE_ENCHANTED)};
+        return new Item[]{Item.get(Item.ENCHANTED_GOLDEN_APPLE)};
     }
 
     @Override

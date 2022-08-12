@@ -187,7 +187,7 @@ public class AdvancedRouteFinder extends RouteFinder{
 	public Vector3 getHighestUnder(double x, double dy, double z, int limit){
 		int minY = (int)dy - limit < 0 ? 0 : (int)dy - limit;
 		for(int y = (int)dy; y >= minY; y--){
-			int blockId = level.getBlockIdAt((int)x, y, (int)z);
+			int blockId = level.getBlock((int)x, y, (int)z).getId();
 
 			if(!canWalkOn(blockId)) return new Vector3(x, y, z);
 			if(!canPassThrough(blockId)) return new Vector3(x, y, z);
@@ -201,14 +201,14 @@ public class AdvancedRouteFinder extends RouteFinder{
 
 		double diff = (block.y - vec.y) + 1;
 
-		if((this.entity instanceof Fallable || -4 < diff) && (this.entity instanceof Climbable || diff <= 1) && canWalkOn(this.entity.getLevel().getBlockIdAt((int)block.x, (int)block.y, (int)block.z))){
+		if((this.entity instanceof Fallable || -4 < diff) && (this.entity instanceof Climbable || diff <= 1) && canWalkOn(this.entity.getLevel().getBlock((int)block.x, (int)block.y, (int)block.z).getId())){
 			return diff;
 		}
 		return -256;
 	}
 
 	private boolean canWalkOn(int blockId){
-		return !(blockId == Block.LAVA || blockId == Block.STILL_LAVA);
+		return !(blockId == Block.FLOWING_LAVA || blockId == Block.LAVA);
 	}
 
 	private double heuristic(Vector3 one, Vector3 two){

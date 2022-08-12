@@ -275,7 +275,7 @@ abstract public class MovingEntity extends EntityCreature{
 		UpdateAttributesPacket pk0 = new UpdateAttributesPacket();
 		pk0.entityId = this.getId();
 		pk0.entries = new Attribute[]{
-				Attribute.getAttribute(Attribute.MAX_HEALTH).setMaxValue(this.getMaxHealth()).setValue(this.getHealth()),
+				Attribute.getAttribute(Attribute.HEALTH).setMaxValue(this.getMaxHealth()).setValue(this.getHealth()),
 		};
 		this.getLevel().addChunkPacket(this.chunk.getX(), this.chunk.getZ(), pk0);
 	}
@@ -287,7 +287,7 @@ abstract public class MovingEntity extends EntityCreature{
 		UpdateAttributesPacket pk0 = new UpdateAttributesPacket();
 		pk0.entityId = this.getId();
 		pk0.entries = new Attribute[]{
-				Attribute.getAttribute(Attribute.MAX_HEALTH).setMaxValue(this.getMaxHealth()).setValue(this.getHealth()),
+				Attribute.getAttribute(Attribute.HEALTH).setMaxValue(this.getMaxHealth()).setValue(this.getHealth()),
 		};
 		this.getLevel().addChunkPacket(this.chunk.getX(), this.chunk.getZ(), pk0);
 	}

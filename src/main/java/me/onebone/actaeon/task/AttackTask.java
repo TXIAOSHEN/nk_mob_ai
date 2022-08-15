@@ -60,17 +60,16 @@ public class AttackTask extends MovingEntityTask {
             valid = yaw < max && yaw > min;
         }
         if (valid && this.effectual) {
-            if (this.target.noDamageTicks <= 0) {
-                EntityDamageByEntityEvent event;
-                if (this.parentEntity != null) {
-                    event = new EntityDamageByChildEntityEvent(this.parentEntity, this.getEntity(), this.target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage);
-                } else {
-                    event = new EntityDamageByEntityEvent(this.getEntity(), this.target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage);
-                }
-                this.callbacks.forEach(cb -> cb.callback(target, event));
-                this.target.attack(event);
-                this.target.noDamageTicks = 10;
+            EntityDamageByEntityEvent event;
+            if (this.parentEntity != null) {
+                event = new EntityDamageByChildEntityEvent(this.parentEntity, this.getEntity(), this.target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage);
+            } else {
+                event = new EntityDamageByEntityEvent(this.getEntity(), this.target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage);
             }
+            event.setAttackCooldown(10);
+            this.callbacks.forEach(cb -> cb.callback(target, event));
+            this.target.attack(event);
+            // this.target.noDamageTicks = 10;
         }
 
         EntityEventPacket pk = new EntityEventPacket();

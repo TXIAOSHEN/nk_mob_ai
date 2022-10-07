@@ -145,12 +145,12 @@ public class AdvancedRouteFinder extends RouteFinder{
 		boolean s1, s2, s3, s4;
 
 		double y;
-		if(s1 = (y = isWalkableAt(vec.add(1))) != -256){
-			neighbors.add(this.grid.getNode(vec.add(1, y)));
+		if(s1 = (y = isWalkableAt(vec.add(1, 0, 0))) != -256){
+			neighbors.add(this.grid.getNode(vec.add(1, y, 0)));
 		}
 
-		if(s2 = (y = isWalkableAt(vec.add(-1))) != -256){
-			neighbors.add(this.grid.getNode(vec.add(-1, y)));
+		if(s2 = (y = isWalkableAt(vec.add(-1, 0, 0))) != -256){
+			neighbors.add(this.grid.getNode(vec.add(-1, y, 0)));
 		}
 
 		if(s3 = (y = isWalkableAt(vec.add(0, 0, 1))) != -256){

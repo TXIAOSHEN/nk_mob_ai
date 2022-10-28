@@ -11,11 +11,22 @@ public class ListHaterTargetFinder extends TargetFinder {
     private List<? extends Entity> list;
     private boolean first = true;
     private double keepDistance = 0;  //为0时为关闭，>0时，自动选取与玩家保持距离的最佳坐标
+    private double maxDistance;
 
-	public ListHaterTargetFinder(MovingEntity entity, long interval, List<? extends Entity> list){
+    public ListHaterTargetFinder(MovingEntity entity, long interval, List<? extends Entity> list){
+        this(entity, interval, list, 100000);
+    }
+
+	public ListHaterTargetFinder(MovingEntity entity, long interval, List<? extends Entity> list, double maxDistance){
 		super(entity, interval);
         this.list = list;
+        this.maxDistance = maxDistance;
 	}
+
+    public ListHaterTargetFinder setMaxDistance(double maxDistance) {
+        this.maxDistance = maxDistance;
+        return this;
+    }
 
     public void setList(List<? extends Entity> list) {
         this.list = list;
@@ -32,7 +43,7 @@ public class ListHaterTargetFinder extends TargetFinder {
     protected void find() {
         Entity near = null;
 
-        double nearest = 100000;
+        double nearest = maxDistance;
 
         for (Entity entity: this.list) {
             if (this.getEntity() != entity && this.getEntity().distanceSquared(entity) < nearest){

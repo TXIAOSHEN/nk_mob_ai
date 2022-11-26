@@ -10,7 +10,7 @@ import cn.nukkit.network.protocol.AddEntityPacket;
 import cn.nukkit.network.protocol.UpdateAttributesPacket;
 import me.onebone.actaeon.entity.MovingEntity;
 
-abstract public class Animal extends MovingEntity implements EntityAgeable{
+abstract public class Animal extends MovingEntity implements EntityAgeable {
 	public Animal(FullChunk chunk, CompoundTag nbt){
 		super(chunk, nbt);
 	}

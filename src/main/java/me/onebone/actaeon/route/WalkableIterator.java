@@ -1,12 +1,14 @@
 package me.onebone.actaeon.route;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.Vector3;
 
 import java.util.*;
 
 public class WalkableIterator implements Iterator<Block> {
+
     private final Level level;
     private final int maxDistance;
     private final double width;
@@ -16,7 +18,7 @@ public class WalkableIterator implements Iterator<Block> {
     private Block currentBlockObject;
 
     private double currentDistance;
-    private Vector3 startPosition;
+    private final Vector3 startPosition;
     private Vector3 startPositionLeft;
     private Vector3 startPositionRight;
     private Vector3 currentPosition = null;
@@ -25,9 +27,11 @@ public class WalkableIterator implements Iterator<Block> {
     private Vector3 direction = null;
 
     private AdvancedRouteFinder advancedRouteFinder;
+    private final Entity entity;
 
-    public WalkableIterator(AdvancedRouteFinder advancedRouteFinder, Level level, Vector3 start, Vector3 direction, double width, int maxDistance) {
+    public WalkableIterator(AdvancedRouteFinder advancedRouteFinder, Entity entity, Level level, Vector3 start, Vector3 direction, double width, int maxDistance) {
         this.advancedRouteFinder = advancedRouteFinder;
+        this.entity = entity;
         this.level = level;
         this.width = width;
         this.maxDistance = maxDistance == 0 ? 120 : maxDistance;
@@ -77,7 +81,7 @@ public class WalkableIterator implements Iterator<Block> {
             Vector3 next = this.currentPosition.add(this.direction);
             if (!checked.contains(check = this.currentPosition.floor())) {
                 Block block = this.level.getBlock(check);
-                double walkable = this.advancedRouteFinder.isWalkableAt(block);
+                double walkable = AdvancedRouteFinder.isWalkableAt(entity, block);
                 //Server.getInstance().getLogger().info(block.getLocation().toString() + " LEFT walkable=" + walkable);
                 if (walkable < 0) {
                     this.currentBlockObject = block;

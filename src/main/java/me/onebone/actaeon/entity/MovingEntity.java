@@ -5,6 +5,7 @@ import cn.nukkit.entity.Attribute;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.EntityHuman;
+import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
@@ -13,10 +14,8 @@ import cn.nukkit.network.protocol.UpdateAttributesPacket;
 import co.aikar.timings.Timing;
 import co.aikar.timings.TimingsManager;
 import me.onebone.actaeon.hook.MovingEntityHook;
-import me.onebone.actaeon.route.AdvancedRouteFinder;
 import me.onebone.actaeon.route.Node;
-import me.onebone.actaeon.route.RouteFinder;
-import me.onebone.actaeon.runnable.RouteFinderSearchAsyncTask;
+import me.onebone.actaeon.route.Router;
 import me.onebone.actaeon.target.TargetFinder;
 import me.onebone.actaeon.task.MovingEntityTask;
 
@@ -24,9 +23,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-abstract public class MovingEntity extends EntityCreature{
+abstract public class MovingEntity extends EntityCreature implements IMovingEntity {
+
 	private boolean isKnockback = false;
-	private RouteFinder route = null;
+	private Router router;
 	private TargetFinder targetFinder = null;
 	private Vector3 target = null;
 	private Entity hate = null;
@@ -50,9 +50,13 @@ abstract public class MovingEntity extends EntityCreature{
 		this.movingEntityPart3Timing = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate Part3");
 		this.movingEntityPart4Timing = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate Part4");
 
-		this.route = new AdvancedRouteFinder(this);
-		//this.route = new SimpleRouteFinder(this);
+		this.router = new Router(this);
 		this.setImmobile(false);
+	}
+
+	@Override
+	public Entity getEntity() {
+		return this;
 	}
 
 	public Map<String, MovingEntityHook> getHooks() {
@@ -119,33 +123,50 @@ abstract public class MovingEntity extends EntityCreature{
 
 		if (this.targetFinder != null) this.targetFinder.onUpdate();
 
-		if(this.routeLeading && this.onGround && this.hasSetTarget() && !this.route.isSearching() && System.currentTimeMillis() >= this.route.stopRouteFindUntil && (this.route.getDestination() == null || this.route.getDestination().distance(this.getTarget()) > 2)){ // 대상이 이동함
-            if (RouteFinderSearchAsyncTask.getTaskSize() < 50) Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox));
-
-			/*if(this.route.isSearching()) this.route.research();
-			else this.route.search();*/
-
+		// 如果没在寻路，但是设置了目标，达到了下次寻路计划的时间，就开始寻路
+		if (this.routeLeading) {
+			this.router.onTick();
 			hasUpdate = true;
 		}
+		/*if (this.routeLeading && this.onGround
+				&& this.hasSetTarget() &&
+				!this.route.isSearching()
+				&& System.currentTimeMillis() >= this.route.nextRouteFind
+				&& (this.route.getDestination() == null || this.route.getDestination().distance(this.getTarget()) > 2))
+		{ // 대상이 이동함
+
+			if (RouteFinderSearchAsyncTask.getTaskSize() < 50) Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox));
+
+			*//*if(this.route.isSearching()) this.route.research();
+			else this.route.search();*//*
+
+			hasUpdate = true;
+		}*/
 
 		this.movingEntityPart2Timing.stopTiming();
 
 		if (!this.isImmobile()) {
 			this.movingEntityPart3Timing.startTiming();
-			if(this.routeLeading && !this.isKnockback && !this.route.isSearching() && this.route.isSuccess() && this.route.hasRoute()){ // entity has route to go
+			// 如果未在寻路，并且有寻路路径，则控制实体前往下一个节点
+			if (this.routeLeading && !this.isKnockback && !this.router.isSearching() && this.router.hasRoute()) { // entity has route to go
 				hasUpdate = true;
 
-				Node node = this.route.get();
-				if(node != null){
+				// 获取下一寻路的节点
+				Node node = this.router.get();
+				if (node != null) {
 					//Server.broadcastPacket(level.getPlayers().values().stream().toArray(Player[]::new), new cn.nukkit.level.particle.RedstoneParticle(node.getVector3(), 2).encode()[0]);
 					Vector3 vec = node.getVector3();
 					double diffX = Math.pow(vec.x - this.x, 2);
 					double diffZ = Math.pow(vec.z - this.z, 2);
 
-					if(diffX + diffZ == 0){
-						if(!this.route.next()){
-							this.route.arrived();
+					// 已经达到了节点
+					if (diffX + diffZ == 0) {
+						// 那么将节点调至下一个节点，如果没有下一个节点了，则到达目的地
+						if (this.router.hasNext()) {
+							this.router.next();
 							//Server.getInstance().getLogger().warning(vec.toString());
+						} else {
+							this.router.arrived();
 						}
 					} else {
 						int negX = vec.x - this.x < 0 ? -1 : 1;
@@ -196,28 +217,27 @@ abstract public class MovingEntity extends EntityCreature{
 		return hasUpdate;
 	}
 
-	public double getRange(){
+	public double getRange() {
 		return 100.0;
 	}
 
-	public void setTarget(Vector3 vec, String identifier){
-		this.setTarget(vec, identifier, false);
+	public void setTarget(Vector3 vec, String identifier) {
+		this.setTarget(vec, identifier, true);
 	}
 
-	public void setTarget(Vector3 vec, String identifier, boolean forceSearch){
-		if(identifier == null) return;
+	public void setTarget(Vector3 vec, String identifier, boolean immediate) {
+		if (identifier == null) return;
 
-		if(forceSearch || !this.hasSetTarget() || identifier.equals(this.targetSetter)){
+		if (immediate || !this.hasSetTarget() || identifier.equals(this.targetSetter)) {
 			this.target = vec;
 
 			this.targetSetter = identifier;
 		}
 
-		if(this.hasSetTarget() && (forceSearch || !this.route.hasRoute())){
-            this.route.forceStop();
-            Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox.clone()));
-			/*if(this.route.isSearching()) this.route.research();
-			else this.route.search();*/
+		// 如果设置了新的目标，则按需重新开始寻路
+		if (this.hasSetTarget()) {
+			// 这边可以直接把某个实体设为Target，会被无缝传入到寻路中，自动更新寻路目标坐标
+			this.router.setDestination(vec instanceof Position ? (Position) vec : Position.fromObject(vec, this.level), immediate || !this.router.hasRoute());
 		}
 	}
 
@@ -229,13 +249,6 @@ abstract public class MovingEntity extends EntityCreature{
 		return new Vector3(this.target.x, this.target.y, this.target.z);
 	}
 
-	/**
-	 * Returns whether the entity has following target
-	 * Entity will try to move to position where target exists
-	 */
-	public boolean hasFollowingTarget(){
-		return this.route.getDestination() != null && this.target != null && this.distance(this.target) < this.getRange();
-	}
 
 	/**
 	 * Returns whether the entity has set its target
@@ -306,12 +319,8 @@ abstract public class MovingEntity extends EntityCreature{
 		super.knockBack(attacker, damage, x, z, base / 2);
 	}
 
-    public void setRoute(RouteFinder route) {
-        this.route = route;
-    }
-
-    public RouteFinder getRoute() {
-        return route;
+    public Router getRouter() {
+        return router;
     }
 
     public void setTargetFinder(TargetFinder targetFinder) {

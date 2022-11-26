@@ -14,8 +14,8 @@ public class Node{
 		this.node = new Vector3(x, y, z);
 	}
 
-	public Node(Vector3 vec){
-		if(vec == null){
+	public Node(Vector3 vec) {
+		if (vec == null) {
 			throw new IllegalArgumentException("Node cannot be null");
 		}
 

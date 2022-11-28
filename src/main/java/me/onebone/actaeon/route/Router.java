@@ -29,6 +29,7 @@ public class Router implements Iterator<Node> {
 	private int current = 0;
 	// 目的地
 	protected Position destination = null;
+	protected Position lastDestination = null;
 	private boolean arrived = false;
 	protected List<Node> nodes = new ArrayList<>();
 
@@ -52,6 +53,8 @@ public class Router implements Iterator<Node> {
 	public void setDestination(Position destination, boolean immediate) {
 		this.destination = destination;
 		if (immediate) {
+			// 强制立即开始寻路
+			this.lastDestination = null;
 			this.nextRouteFind = System.currentTimeMillis();
 		}
 	}
@@ -59,8 +62,11 @@ public class Router implements Iterator<Node> {
 	public void onTick() {
 		if (!this.isSearching() && System.currentTimeMillis() >= this.nextRouteFind) {
 			if (destination == null) return;
-			// TODO 判断是否需要重新寻路
+			// 目的地没有变更，则不需要再次寻路
+			if (Position.fromObject(destination, destination.level).equals(lastDestination)) return;
+
 			this.nextRouteFind = System.currentTimeMillis() + routeFinder.getRouteFindCooldown();
+			this.lastDestination = Position.fromObject(destination, destination.level);
 
 			this.promise = routeFinder.search(entity.getEntity(), entity.getPosition(), destination);
 

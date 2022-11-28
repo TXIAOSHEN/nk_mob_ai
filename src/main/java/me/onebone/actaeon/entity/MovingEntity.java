@@ -6,6 +6,7 @@ import cn.nukkit.block.BlockID;
 import cn.nukkit.entity.*;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.inventory.InventoryHolder;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.Position;
@@ -33,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-abstract public class MovingEntity extends EntityCreature implements IMovingEntity {
+abstract public class MovingEntity extends EntityCreature implements IMovingEntity, InventoryHolder {
 
 	private static final String TAG_MAINHAND = "Mainhand";
 	private static final String TAG_OFFHAND = "Offhand";
@@ -71,6 +72,31 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 
 		this.router = new Router(this);
 		this.setImmobile(false);
+	}
+
+	@Override
+	protected void initEntity() {
+		super.initEntity();
+
+		// this.setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_NO_AI);
+
+		this.equipmentInventory = new EntityEquipmentInventory(this);
+		this.armorInventory = new EntityArmorInventory(this);
+
+		if (this.namedTag.contains(TAG_MAINHAND)) {
+			this.equipmentInventory.setItemInHand(NBTIO.getItemHelper(this.namedTag.getCompound(TAG_MAINHAND)), true);
+		}
+
+		if (this.namedTag.contains(TAG_OFFHAND)) {
+			this.equipmentInventory.setItemInOffhand(NBTIO.getItemHelper(this.namedTag.getCompound(TAG_OFFHAND)), true);
+		}
+
+		if (this.namedTag.contains(TAG_ARMOR)) {
+			ListTag<CompoundTag> armorList = this.namedTag.getList(TAG_ARMOR, CompoundTag.class);
+			for (CompoundTag armorTag : armorList.getAll()) {
+				this.armorInventory.setItem(armorTag.getByte("Slot"), NBTIO.getItemHelper(armorTag));
+			}
+		}
 	}
 
 	@Override
@@ -241,7 +267,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 	}
 
 	public void setTarget(Vector3 vec, String identifier) {
-		this.setTarget(vec, identifier, true);
+		this.setTarget(vec, identifier, false);
 	}
 
 	public void setTarget(Vector3 vec, String identifier, boolean immediate) {
@@ -253,7 +279,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 			this.targetSetter = identifier;
 		}
 
-		// 如果设置了新的目标，则按需重新开始寻路
+		// 如果设置了新的目标，则按需重新开始寻路ding
 		if (this.hasSetTarget()) {
 			// 这边可以直接把某个实体设为Target，会被无缝传入到寻路中，自动更新寻路目标坐标
 			this.router.setDestination(vec instanceof Position ? (Position) vec : Position.fromObject(vec, this.level), immediate || !this.router.hasRoute());
@@ -343,31 +369,6 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 				armorTag.add(NBTIO.putItemHelper(this.armorInventory.getItem(i), i));
 			}
 			this.namedTag.putList(armorTag);
-		}
-	}
-
-	@Override
-	protected void initEntity(){
-		super.initEntity();
-
-		// this.setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_NO_AI);
-
-		this.equipmentInventory = new EntityEquipmentInventory(this);
-		this.armorInventory = new EntityArmorInventory(this);
-
-		if (this.namedTag.contains(TAG_MAINHAND)) {
-			this.equipmentInventory.setItemInHand(NBTIO.getItemHelper(this.namedTag.getCompound(TAG_MAINHAND)), true);
-		}
-
-		if (this.namedTag.contains(TAG_OFFHAND)) {
-			this.equipmentInventory.setItemInOffhand(NBTIO.getItemHelper(this.namedTag.getCompound(TAG_OFFHAND)), true);
-		}
-
-		if (this.namedTag.contains(TAG_ARMOR)) {
-			ListTag<CompoundTag> armorList = this.namedTag.getList(TAG_ARMOR, CompoundTag.class);
-			for (CompoundTag armorTag : armorList.getAll()) {
-				this.armorInventory.setItem(armorTag.getByte("Slot"), NBTIO.getItemHelper(armorTag));
-			}
 		}
 	}
 

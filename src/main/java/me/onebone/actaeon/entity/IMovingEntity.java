@@ -41,7 +41,7 @@ public interface IMovingEntity {
     TargetFinder getTargetFinder();
 
     default void setTarget(Vector3 vec, String identifier) {
-        this.setTarget(vec, identifier, true);
+        this.setTarget(vec, identifier, false);
     }
 
     void setTarget(Vector3 vec, String identifier, boolean immediate);

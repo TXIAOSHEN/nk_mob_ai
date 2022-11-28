@@ -1,19 +1,28 @@
 package me.onebone.actaeon.entity;
 
+import cn.nukkit.Player;
 import cn.nukkit.Server;
-import cn.nukkit.entity.Attribute;
-import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.EntityCreature;
-import cn.nukkit.entity.EntityHuman;
+import cn.nukkit.block.BlockID;
+import cn.nukkit.entity.*;
+import cn.nukkit.event.entity.EntityDamageByEntityEvent;
+import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.item.Item;
+import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.sound.SoundEnum;
 import cn.nukkit.math.AxisAlignedBB;
+import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.network.protocol.UpdateAttributesPacket;
 import co.aikar.timings.Timing;
 import co.aikar.timings.TimingsManager;
 import me.onebone.actaeon.hook.MovingEntityHook;
+import me.onebone.actaeon.inventory.EntityArmorInventory;
+import me.onebone.actaeon.inventory.EntityEquipmentInventory;
 import me.onebone.actaeon.route.Node;
 import me.onebone.actaeon.route.Router;
 import me.onebone.actaeon.target.TargetFinder;
@@ -22,8 +31,13 @@ import me.onebone.actaeon.task.MovingEntityTask;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 abstract public class MovingEntity extends EntityCreature implements IMovingEntity {
+
+	private static final String TAG_MAINHAND = "Mainhand";
+	private static final String TAG_OFFHAND = "Offhand";
+	private static final String TAG_ARMOR = "Armor";
 
 	private boolean isKnockback = false;
 	private Router router;
@@ -36,6 +50,10 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 	private MovingEntityTask task = null;
 	private boolean lookAtFront = true;
 	private boolean autoCollide = true;
+
+	private EntityEquipmentInventory equipmentInventory;
+	private EntityArmorInventory armorInventory;
+
 	private final Timing movingEntityTiming;
 	private final Timing movingEntityPart1Timing;
 	private final Timing movingEntityPart2Timing;
@@ -44,6 +62,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 
 	public MovingEntity(FullChunk chunk, CompoundTag nbt){
 		super(chunk, nbt);
+
 		this.movingEntityTiming = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate");
 		this.movingEntityPart1Timing = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate Part1");
 		this.movingEntityPart2Timing = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate Part2");
@@ -55,7 +74,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 	}
 
 	@Override
-	public Entity getEntity() {
+	public EntityLiving getEntity() {
 		return this;
 	}
 
@@ -80,8 +99,8 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 		this.hate = hate;
 	}
 
-	public void jump(){
-		if(this.onGround){
+	public void jump() {
+		if (this.onGround){
 			this.motionY = 0.35;
 		}
 	}
@@ -306,10 +325,169 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 	}
 
 	@Override
+	public void spawnTo(Player player) {
+		super.spawnTo(player);
+		this.equipmentInventory.sendContents(player);
+		this.armorInventory.sendContents(player);
+	}
+
+	@Override
+	public void saveNBT() {
+		super.saveNBT();
+		this.namedTag.put(TAG_MAINHAND, NBTIO.putItemHelper(this.equipmentInventory.getItemInHand()));
+		this.namedTag.put(TAG_OFFHAND, NBTIO.putItemHelper(this.equipmentInventory.getItemInOffhand()));
+
+		if (this.armorInventory != null) {
+			ListTag<CompoundTag> armorTag = new ListTag<>(TAG_ARMOR);
+			for (int i = 0; i < 4; i++) {
+				armorTag.add(NBTIO.putItemHelper(this.armorInventory.getItem(i), i));
+			}
+			this.namedTag.putList(armorTag);
+		}
+	}
+
+	@Override
 	protected void initEntity(){
 		super.initEntity();
 
-		this.setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_NO_AI);
+		// this.setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_NO_AI);
+
+		this.equipmentInventory = new EntityEquipmentInventory(this);
+		this.armorInventory = new EntityArmorInventory(this);
+
+		if (this.namedTag.contains(TAG_MAINHAND)) {
+			this.equipmentInventory.setItemInHand(NBTIO.getItemHelper(this.namedTag.getCompound(TAG_MAINHAND)), true);
+		}
+
+		if (this.namedTag.contains(TAG_OFFHAND)) {
+			this.equipmentInventory.setItemInOffhand(NBTIO.getItemHelper(this.namedTag.getCompound(TAG_OFFHAND)), true);
+		}
+
+		if (this.namedTag.contains(TAG_ARMOR)) {
+			ListTag<CompoundTag> armorList = this.namedTag.getList(TAG_ARMOR, CompoundTag.class);
+			for (CompoundTag armorTag : armorList.getAll()) {
+				this.armorInventory.setItem(armorTag.getByte("Slot"), NBTIO.getItemHelper(armorTag));
+			}
+		}
+	}
+
+	@Override
+	public boolean attack(EntityDamageEvent source) {
+		if (this.isClosed() || !this.isAlive()) {
+			return false;
+		}
+
+		if (source.getCause() != EntityDamageEvent.DamageCause.VOID && source.getCause() != EntityDamageEvent.DamageCause.CUSTOM && source.getCause() != EntityDamageEvent.DamageCause.MAGIC && source.getCause() != EntityDamageEvent.DamageCause.HUNGER) {
+			int armorPoints = 0;
+			int epf = 0;
+//            int toughness = 0;
+
+			EntityArmorInventory armorInventory = this.getArmorInventory();
+			for (Item armor : armorInventory.getContents().values()) {
+				armorPoints += armor.getArmorPoints();
+				epf += calculateEnchantmentProtectionFactor(armor, source);
+				//toughness += armor.getToughness();
+			}
+
+			if (source.canBeReducedByArmor()) {
+				source.setDamage(-source.getFinalDamage() * armorPoints * 0.04f, EntityDamageEvent.DamageModifier.ARMOR);
+			}
+
+			source.setDamage(-source.getFinalDamage() * Math.min(NukkitMath.ceilFloat(Math.min(epf, 25) * ((float) ThreadLocalRandom.current().nextInt(50, 100) / 100)), 20) * 0.04f,
+					EntityDamageEvent.DamageModifier.ARMOR_ENCHANTMENTS);
+
+			source.setDamage(-Math.min(this.getAbsorption(), source.getFinalDamage()), EntityDamageEvent.DamageModifier.ABSORPTION);
+		}
+
+		if (super.attack(source)) {
+			Entity damager = null;
+
+			if (source instanceof EntityDamageByEntityEvent) {
+				damager = ((EntityDamageByEntityEvent) source).getDamager();
+			}
+
+			for (int slot = 0; slot < 4; slot++) {
+				Item armor = damageArmor(armorInventory.getItem(slot), damager);
+				armorInventory.setItem(slot, armor, armor.getId() != BlockID.AIR);
+			}
+
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public void setOnFire(int seconds) {
+		int level = 0;
+
+		for (Item armor : this.getArmorInventory().getContents().values()) {
+			Enchantment fireProtection = armor.getEnchantment(Enchantment.ID_PROTECTION_FIRE);
+
+			if (fireProtection != null && fireProtection.getLevel() > 0) {
+				level = Math.max(level, fireProtection.getLevel());
+			}
+		}
+
+		seconds = (int) (seconds * (1 - level * 0.15));
+
+		super.setOnFire(seconds);
+	}
+
+	protected double calculateEnchantmentProtectionFactor(Item item, EntityDamageEvent source) {
+		if (!item.hasEnchantments()) {
+			return 0;
+		}
+
+		double epf = 0;
+
+		for (Enchantment ench : item.getEnchantments()) {
+			epf += ench.getProtectionFactor(source);
+		}
+
+		return epf;
+	}
+
+	protected Item damageArmor(Item armor, Entity damager) {
+		if (armor.hasEnchantments()) {
+			if (damager != null) {
+				for (Enchantment enchantment : armor.getEnchantments()) {
+					enchantment.doPostAttack(damager, this);
+				}
+			}
+
+			Enchantment durability = armor.getEnchantment(Enchantment.ID_DURABILITY);
+			if (durability != null
+					&& durability.getLevel() > 0
+					&& (100 / (durability.getLevel() + 1)) <= ThreadLocalRandom.current().nextInt(100)) {
+				return armor;
+			}
+		}
+
+		if (armor.isUnbreakable() || armor.getMaxDurability() < 0) {
+			return armor;
+		}
+
+		armor.setDamage(armor.getDamage() + 1);
+
+		if (armor.getDamage() >= armor.getMaxDurability()) {
+			getLevel().addSound(this, SoundEnum.RANDOM_BREAK);
+			return Item.get(BlockID.AIR, 0, 0);
+		}
+
+		return armor;
+	}
+
+	public EntityArmorInventory getArmorInventory() {
+		return armorInventory;
+	}
+
+	public EntityEquipmentInventory getEquipmentInventory() {
+		return equipmentInventory;
+	}
+
+	public EntityEquipmentInventory getInventory() {
+		return equipmentInventory;
 	}
 
 	@Override
@@ -326,6 +504,11 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
     public void setTargetFinder(TargetFinder targetFinder) {
         this.targetFinder = targetFinder;
     }
+
+	@Override
+	public TargetFinder getTargetFinder() {
+		return targetFinder;
+	}
 
 	public void updateBotTask(MovingEntityTask task) {
 		if (this.task != null) this.task.forceStop();

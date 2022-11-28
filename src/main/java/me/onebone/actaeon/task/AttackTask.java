@@ -5,9 +5,8 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.event.entity.EntityDamageByChildEntityEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
-import cn.nukkit.network.protocol.AnimatePacket;
 import cn.nukkit.network.protocol.EntityEventPacket;
-import me.onebone.actaeon.entity.MovingEntity;
+import me.onebone.actaeon.entity.IMovingEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,15 +26,15 @@ public class AttackTask extends MovingEntityTask {
     private final boolean effectual;
     private final List<AttackCallback> callbacks;
 
-    public AttackTask(MovingEntity entity, Entity target, float damage, double viewAngle, boolean effectual) {
+    public AttackTask(IMovingEntity entity, Entity target, float damage, double viewAngle, boolean effectual) {
         this(entity, null, target, damage, viewAngle, effectual);
     }
 
-    public AttackTask(MovingEntity entity, Entity parentEntity, Entity target, float damage, double viewAngle, boolean effectual) {
+    public AttackTask(IMovingEntity entity, Entity parentEntity, Entity target, float damage, double viewAngle, boolean effectual) {
         this(entity, parentEntity, target, damage, viewAngle, effectual, new ArrayList<>());
     }
 
-    public AttackTask(MovingEntity entity, Entity parentEntity, Entity target, float damage, double viewAngle, boolean effectual, List<AttackCallback> callbacks) {
+    public AttackTask(IMovingEntity entity, Entity parentEntity, Entity target, float damage, double viewAngle, boolean effectual, List<AttackCallback> callbacks) {
         super(entity);
         this.parentEntity = parentEntity;
         this.target = target;
@@ -47,10 +46,10 @@ public class AttackTask extends MovingEntityTask {
 
     @Override
     public void onUpdate(int tick) {
-        double angle = Math.atan2(this.target.z - this.entity.z, this.target.x - this.entity.x);
+        double angle = Math.atan2(this.target.z - this.entity.getZ(), this.target.x - this.entity.getX());
         double yaw = ((angle * 180) / Math.PI) - 90;
-        double min = this.entity.yaw - this.viewAngle / 2;
-        double max = this.entity.yaw + this.viewAngle / 2;
+        double min = this.entity.getYaw() - this.viewAngle / 2;
+        double max = this.entity.getY() + this.viewAngle / 2;
         boolean valid;
         if (min < 0) {
             valid = yaw > 360 + min || yaw < max;
@@ -62,9 +61,9 @@ public class AttackTask extends MovingEntityTask {
         if (valid && this.effectual) {
             EntityDamageByEntityEvent event;
             if (this.parentEntity != null) {
-                event = new EntityDamageByChildEntityEvent(this.parentEntity, this.getEntity(), this.target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage);
+                event = new EntityDamageByChildEntityEvent(this.parentEntity, this.getEntity().getEntity(), this.target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage);
             } else {
-                event = new EntityDamageByEntityEvent(this.getEntity(), this.target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage);
+                event = new EntityDamageByEntityEvent(this.getEntity().getEntity(), this.target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage);
             }
             event.setAttackCooldown(10);
             this.callbacks.forEach(cb -> cb.callback(target, event));
@@ -73,9 +72,9 @@ public class AttackTask extends MovingEntityTask {
         }
 
         EntityEventPacket pk = new EntityEventPacket();
-        pk.eid = this.entity.getId();
+        pk.eid = this.entity.getEntity().getId();
         pk.event = 4;
-        Server.broadcastPacket(this.getEntity().getViewers().values(), pk);
+        Server.broadcastPacket(this.getEntity().getEntity().getViewers().values(), pk);
         this.entity.updateBotTask(null);
     }
 

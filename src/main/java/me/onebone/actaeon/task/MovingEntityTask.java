@@ -1,6 +1,6 @@
 package me.onebone.actaeon.task;
 
-import me.onebone.actaeon.entity.MovingEntity;
+import me.onebone.actaeon.entity.IMovingEntity;
 
 /**
  * MovingEntityTask
@@ -10,9 +10,9 @@ import me.onebone.actaeon.entity.MovingEntity;
  */
 public abstract class MovingEntityTask {
 
-    protected MovingEntity entity;
+    protected IMovingEntity entity;
 
-    public MovingEntityTask(MovingEntity entity) {
+    public MovingEntityTask(IMovingEntity entity) {
         this.entity = entity;
     }
 
@@ -20,7 +20,7 @@ public abstract class MovingEntityTask {
 
     public abstract void forceStop();
 
-    public MovingEntity getEntity() {
+    public IMovingEntity getEntity() {
         return entity;
     }
 }

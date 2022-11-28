@@ -1,8 +1,9 @@
 package me.onebone.actaeon.hook;
 
 import cn.nukkit.entity.Entity;
-import me.onebone.actaeon.entity.MovingEntity;
+import me.onebone.actaeon.entity.IMovingEntity;
 import me.onebone.actaeon.task.AttackTask;
+import me.onebone.actaeon.task.MovingEntityTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,25 +17,30 @@ import java.util.Random;
  */
 public class AttackHook extends MovingEntityHook {
 
-    private Entity parentEntity;
+    public interface AttackTaskSupplier {
+        MovingEntityTask get(Entity target);
+    }
+
+    private final Entity parentEntity;
     private long lastAttack = 0;
-    private double attackDistance;
+    private final double attackDistance;
     private long coolDown;
-    private int effectual;  //攻击成功率 0~10
-    private double viewAngle;  //机器人视野范围（攻击有效范围）
+    private final int effectual;  //攻击成功率 0~10
+    private final double viewAngle;  //机器人视野范围（攻击有效范围）
     private boolean jump;  //是否自动跳劈
     private float damage;
     private final List<AttackTask.AttackCallback> callbacks = new ArrayList<>();
+    private AttackTaskSupplier attackTaskSupplier;
 
-    public AttackHook(MovingEntity entity) {
+    public AttackHook(IMovingEntity entity) {
         this(entity, 2.6, 2, 250, 6, 75);
     }
 
-    public AttackHook(MovingEntity bot, double attackDistance, float damage, long coolDown, int effectual, double viewAngle) {
+    public AttackHook(IMovingEntity bot, double attackDistance, float damage, long coolDown, int effectual, double viewAngle) {
         this(bot, null, attackDistance, damage, coolDown, effectual, viewAngle);
     }
 
-    public AttackHook(MovingEntity bot, Entity parentEntity, double attackDistance, float damage, long coolDown, int effectual, double viewAngle) {
+    public AttackHook(IMovingEntity bot, Entity parentEntity, double attackDistance, float damage, long coolDown, int effectual, double viewAngle) {
         super(bot);
         this.parentEntity = parentEntity;
         this.attackDistance = attackDistance;
@@ -42,6 +48,12 @@ public class AttackHook extends MovingEntityHook {
         this.coolDown = coolDown;
         this.effectual = effectual;
         this.viewAngle = viewAngle;
+        this.attackTaskSupplier = (target) -> new AttackTask(this.entity, this.parentEntity, target, this.damage, this.viewAngle, new Random().nextInt(10) < this.effectual, this.callbacks);
+    }
+
+    public AttackHook setAttackTaskSupplier(AttackTaskSupplier attackTaskSupplier) {
+        this.attackTaskSupplier = attackTaskSupplier;
+        return this;
     }
 
     public float getDamage() {
@@ -85,7 +97,7 @@ public class AttackHook extends MovingEntityHook {
             if (this.entity.distance(hate) <= this.attackDistance) {
                 if (System.currentTimeMillis() - this.lastAttack > this.coolDown) {
                     if (this.entity.getTask() == null) {
-                        this.entity.updateBotTask(new AttackTask(this.entity, this.parentEntity, hate, this.damage, this.viewAngle, new Random().nextInt(10) < this.effectual, this.callbacks));
+                        this.entity.updateBotTask(this.attackTaskSupplier.get(hate));
                     }
                     this.lastAttack = System.currentTimeMillis();
                     if (this.jump && new Random().nextBoolean()) this.entity.jump();

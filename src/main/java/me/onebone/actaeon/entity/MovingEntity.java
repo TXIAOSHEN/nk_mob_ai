@@ -273,16 +273,17 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 	public void setTarget(Vector3 vec, String identifier, boolean immediate) {
 		if (identifier == null) return;
 
-		if (immediate || !this.hasSetTarget() || identifier.equals(this.targetSetter)) {
+		if (vec == null || immediate || !this.hasSetTarget() || identifier.equals(this.targetSetter)) {
 			this.target = vec;
-
 			this.targetSetter = identifier;
 		}
 
 		// 如果设置了新的目标，则按需重新开始寻路ding
-		if (this.hasSetTarget()) {
-			// 这边可以直接把某个实体设为Target，会被无缝传入到寻路中，自动更新寻路目标坐标
+		// 这边可以直接把某个实体设为Target，会被无缝传入到寻路中，自动更新寻路目标坐标
+		if (vec != null) {
 			this.router.setDestination(vec instanceof Position ? (Position) vec : Position.fromObject(vec, this.level), immediate || !this.router.hasRoute());
+		} else {
+			this.router.setDestination(null, true);
 		}
 	}
 

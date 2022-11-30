@@ -79,6 +79,8 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 		super.initEntity();
 
 		// this.setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_NO_AI);
+		this.setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_CAN_WALK);
+		this.setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_GRAVITY);
 
 		this.equipmentInventory = new EntityEquipmentInventory(this);
 		this.armorInventory = new EntityArmorInventory(this);

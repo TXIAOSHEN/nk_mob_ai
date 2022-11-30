@@ -426,7 +426,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 		int level = 0;
 
 		for (Item armor : this.getArmorInventory().getContents().values()) {
-			Enchantment fireProtection = armor.getEnchantment(Enchantment.ID_PROTECTION_FIRE);
+			Enchantment fireProtection = armor.getEnchantment(Enchantment.ID_FIRE_PROTECTION);
 
 			if (fireProtection != null && fireProtection.getLevel() > 0) {
 				level = Math.max(level, fireProtection.getLevel());
@@ -460,7 +460,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 				}
 			}
 
-			Enchantment durability = armor.getEnchantment(Enchantment.ID_DURABILITY);
+			Enchantment durability = armor.getEnchantment(Enchantment.ID_UNBREAKING);
 			if (durability != null
 					&& durability.getLevel() > 0
 					&& (100 / (durability.getLevel() + 1)) <= ThreadLocalRandom.current().nextInt(100)) {

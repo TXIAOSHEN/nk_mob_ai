@@ -1,7 +1,8 @@
 package me.onebone.actaeon.hook;
 
-import cn.nukkit.entity.Entity;
-import me.onebone.actaeon.entity.MovingEntity;
+import cn.nukkit.Player;
+import cn.nukkit.event.entity.EntityDamageEvent;
+import me.onebone.actaeon.entity.IMovingEntity;
 
 /**
  * ECPlayerBotHook
@@ -13,18 +14,20 @@ import me.onebone.actaeon.entity.MovingEntity;
  */
 public abstract class MovingEntityHook {
 
-    protected final MovingEntity entity;
+    protected final IMovingEntity entity;
 
-    public MovingEntityHook(MovingEntity entity) {
+    public MovingEntityHook(IMovingEntity entity) {
         this.entity = entity;
     }
 
-    public MovingEntity getEntity() {
+    public IMovingEntity getEntity() {
         return entity;
     }
 
     public void onUpdate(int tick) {}
 
-    public void onDamage(Entity damager) {}
+    public void onDamage(EntityDamageEvent event) {}
+
+    public void onInteract(Player player) {}
 
 }

@@ -2,14 +2,15 @@ package me.onebone.actaeon.target;
 
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
-import me.onebone.actaeon.entity.MovingEntity;
+import me.onebone.actaeon.entity.IMovingEntity;
 
 public class AreaPlayerHoldTargetFinder extends TargetFinder {
 
-	private Item item;
-    private int radius;
+	private final Item item;
+    private final int radius;
+    private boolean first = true;
 
-	public AreaPlayerHoldTargetFinder(MovingEntity entity, long interval, Item item, int radius){
+	public AreaPlayerHoldTargetFinder(IMovingEntity entity, long interval, Item item, int radius) {
 		super(entity, interval);
 		this.item = item;
         this.radius = radius;
@@ -33,7 +34,8 @@ public class AreaPlayerHoldTargetFinder extends TargetFinder {
             this.getEntity().setHate(near);
         } else {
             //this.getEntity().getRoute().forceStop();
-            this.getEntity().setTarget(null, this.getEntity().getName());
+            this.getEntity().setTarget(null, this.getEntity().getName(), first);
         }
+        first = false;
 	}
 }

@@ -7,7 +7,7 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.DoubleTag;
 import cn.nukkit.nbt.tag.FloatTag;
 import cn.nukkit.nbt.tag.ListTag;
-import me.onebone.actaeon.entity.MovingEntity;
+import me.onebone.actaeon.entity.IMovingEntity;
 import me.onebone.actaeon.task.MovingEntityTask;
 
 /**
@@ -22,17 +22,17 @@ public class EvokerAttackTask extends MovingEntityTask {
     private float damage;
     private int index = 1;
 
-    public EvokerAttackTask(MovingEntity entity, Entity target, float damage) {
+    public EvokerAttackTask(IMovingEntity entity, Entity target, float damage) {
         super(entity);
         this.target = target.getPosition();
         this.damage = damage;
-        this.getEntity().setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_EVOKER_SPELL, true);
+        this.getEntity().getEntity().setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_EVOKER_SPELL, true);
     }
 
     @Override
     public void onUpdate(int tick) {
         if (index <= 12) {
-            Vector2 v2 = new Vector2(this.target.x - this.entity.x, this.target.z - this.entity.z);
+            Vector2 v2 = new Vector2(this.target.x - this.entity.getX(), this.target.z - this.entity.getZ());
             v2 = v2.normalize();
 
             double x = this.getEntity().getX() + v2.multiply(index).getX();
@@ -51,7 +51,7 @@ public class EvokerAttackTask extends MovingEntityTask {
                             .add(new FloatTag("", (float) 0))
                             .add(new FloatTag("", (float) 0))
                     );
-            EntityEvocationFang fang = new EntityEvocationFang(this.getEntity().getLevel().getChunk((int)x >> 4, (int)z >> 4), nbt, this.getEntity(), this.damage);
+            EntityEvocationFang fang = new EntityEvocationFang(this.getEntity().getLevel().getChunk((int)x >> 4, (int)z >> 4), nbt, this.getEntity().getEntity(), this.damage);
             fang.spawnToAll();
         }
 
@@ -60,7 +60,7 @@ public class EvokerAttackTask extends MovingEntityTask {
 
     @Override
     public void forceStop() {
-        this.getEntity().setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_EVOKER_SPELL, false);
+        this.getEntity().getEntity().setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_EVOKER_SPELL, false);
     }
 
 }

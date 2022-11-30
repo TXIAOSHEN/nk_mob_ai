@@ -1,19 +1,20 @@
 package me.onebone.actaeon.target;
 
-import me.onebone.actaeon.entity.MovingEntity;
+import me.onebone.actaeon.entity.IMovingEntity;
 
 public abstract class TargetFinder {
-	protected MovingEntity entity = null;
+
+	protected IMovingEntity entity;
 	protected long nextFind = 0;
 	protected long interval;
 
-	public TargetFinder(MovingEntity entity, long interval){
-		if(entity == null) throw new IllegalArgumentException("Entity cannot be null");
+	public TargetFinder(IMovingEntity entity, long interval){
+		if (entity == null) throw new IllegalArgumentException("Entity cannot be null");
 		this.entity = entity;
 		this.interval = interval;
 	}
 
-	public MovingEntity getEntity(){
+	public IMovingEntity getEntity(){
 		return this.entity;
 	}
 

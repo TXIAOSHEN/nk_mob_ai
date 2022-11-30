@@ -1,34 +1,23 @@
 package me.onebone.actaeon.route;
 
-import me.onebone.actaeon.entity.MovingEntity;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.level.Position;
+import net.easecation.eccommons.promise.AsyncPromise;
 
-public class SimpleRouteFinder extends RouteFinder{
-	public SimpleRouteFinder(MovingEntity entity){
-		super(entity);
+import java.util.ArrayList;
+import java.util.List;
+
+public class SimpleRouteFinder implements IRouteFinder {
+
+	public long getRouteFindCooldown() {
+		return 100;
 	}
 
 	@Override
-	public boolean search(){
-		this.stopRouteFindUntil = System.currentTimeMillis() + 100;
-		this.resetNodes();
-
-		this.addNode(new Node(this.getDestination())); // just go straight
-
-		return true;
+	public AsyncPromise<List<Node>> search(Entity entity, Position start, Position destination) {
+		List<Node> result = new ArrayList<>();
+		result.add(new Node(destination));  // just go straight
+		return AsyncPromise.success(result);
 	}
 
-	@Override
-	public boolean research(){
-		return this.search();
-	}
-
-	@Override
-	public boolean isSearching(){
-		return false;
-	}
-
-	@Override
-	public boolean isSuccess(){
-		return nodes.size() > 0;
-	}
 }

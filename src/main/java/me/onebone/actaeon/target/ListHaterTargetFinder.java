@@ -2,7 +2,7 @@ package me.onebone.actaeon.target;
 
 import cn.nukkit.entity.Entity;
 import cn.nukkit.math.Vector3;
-import me.onebone.actaeon.entity.MovingEntity;
+import me.onebone.actaeon.entity.IMovingEntity;
 
 import java.util.List;
 
@@ -11,11 +11,22 @@ public class ListHaterTargetFinder extends TargetFinder {
     private List<? extends Entity> list;
     private boolean first = true;
     private double keepDistance = 0;  //为0时为关闭，>0时，自动选取与玩家保持距离的最佳坐标
+    private double maxDistance;
 
-	public ListHaterTargetFinder(MovingEntity entity, long interval, List<? extends Entity> list){
+    public ListHaterTargetFinder(IMovingEntity entity, long interval, List<? extends Entity> list){
+        this(entity, interval, list, 100000);
+    }
+
+	public ListHaterTargetFinder(IMovingEntity entity, long interval, List<? extends Entity> list, double maxDistance){
 		super(entity, interval);
         this.list = list;
+        this.maxDistance = maxDistance;
 	}
+
+    public ListHaterTargetFinder setMaxDistance(double maxDistance) {
+        this.maxDistance = maxDistance;
+        return this;
+    }
 
     public void setList(List<? extends Entity> list) {
         this.list = list;
@@ -32,10 +43,10 @@ public class ListHaterTargetFinder extends TargetFinder {
     protected void find() {
         Entity near = null;
 
-        double nearest = 100000;
+        double nearest = maxDistance;
 
         for (Entity entity: this.list) {
-            if (this.getEntity() != entity && this.getEntity().distanceSquared(entity) < nearest){
+            if (this.getEntity() != entity && this.getEntity().distanceSquared(entity) < nearest * nearest){
                 near = entity;
                 nearest = this.getEntity().distance(entity);
             }
@@ -46,7 +57,7 @@ public class ListHaterTargetFinder extends TargetFinder {
             if (this.getKeepDistance() <= 0) {
                 this.getEntity().setTarget(near.getPosition(), this.getEntity().getName(), this.first);
             } else {
-                double angle = Math.atan2(this.getEntity().z - near.z, this.getEntity().x - near.x);
+                double angle = Math.atan2(this.getEntity().getZ() - near.z, this.getEntity().getX() - near.x);
                 double yaw = (float) ((angle * 180) / Math.PI) - 90;
                 Vector3 target = this.getEntity().getPosition().add(this.getDirectionVector(yaw).multiply(this.getKeepDistance()));
                 this.getEntity().setTarget(target, this.getEntity().getName(), this.first);

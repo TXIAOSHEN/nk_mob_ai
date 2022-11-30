@@ -3,11 +3,13 @@ package me.onebone.actaeon.entity.monster;
 import cn.nukkit.entity.EntityAgeable;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.sound.SoundEnum;
 import cn.nukkit.nbt.tag.CompoundTag;
-import me.onebone.actaeon.entity.Climbable;
 import me.onebone.actaeon.entity.Fallable;
 import me.onebone.actaeon.hook.AttackHook;
 import me.onebone.actaeon.target.AreaHaterTargetFinder;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Zombie extends Monster implements EntityAgeable, Fallable{
 	public static final int NETWORK_ID = 32;
@@ -72,5 +74,14 @@ public class Zombie extends Monster implements EntityAgeable, Fallable{
 	@Override
 	public boolean isBaby(){
 		return false;
+	}
+
+	@Override
+	public boolean onUpdate(int currentTick) {
+		boolean update = super.onUpdate(currentTick);
+		if (ThreadLocalRandom.current().nextInt(200) == 0) {
+			this.getLevel().addSound(this, SoundEnum.MOB_ZOMBIE_SAY);
+		}
+		return update;
 	}
 }

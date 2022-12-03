@@ -30,7 +30,7 @@ public class Router implements Iterator<Node> {
 	// 目的地
 	protected Position destination = null;
 	protected Position lastDestination = null;
-	private boolean arrived = false;
+	private boolean arrived = true;
 	protected List<Node> nodes = new ArrayList<>();
 
 	protected IMovingEntity entity;
@@ -136,6 +136,10 @@ public class Router implements Iterator<Node> {
 		return vec.x == cur.x
 				//&& vec.y == cur.y
 				&& vec.z == cur.z;
+	}
+
+	public boolean isArrived() {
+		return arrived;
 	}
 
 	/**

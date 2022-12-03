@@ -293,7 +293,8 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
         return this.target;
     }
 
-	public Vector3 getTarget(){
+	public Vector3 getTarget() {
+		if (this.target == null) return null;
 		return new Vector3(this.target.x, this.target.y, this.target.z);
 	}
 

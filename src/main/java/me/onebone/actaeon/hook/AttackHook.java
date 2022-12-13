@@ -8,6 +8,7 @@ import me.onebone.actaeon.task.MovingEntityTask;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Supplier;
 
 /**
  * AttackHook
@@ -28,19 +29,27 @@ public class AttackHook extends MovingEntityHook {
     private final int effectual;  //攻击成功率 0~10
     private final double viewAngle;  //机器人视野范围（攻击有效范围）
     private boolean jump;  //是否自动跳劈
-    private float damage;
+    private Supplier<Float> damage;
     private final List<AttackTask.AttackCallback> callbacks = new ArrayList<>();
     private AttackTaskSupplier attackTaskSupplier;
 
     public AttackHook(IMovingEntity entity) {
-        this(entity, 2.6, 2, 250, 6, 75);
+        this(entity, 2.6, () -> 2f, 250, 6, 75);
     }
 
     public AttackHook(IMovingEntity bot, double attackDistance, float damage, long coolDown, int effectual, double viewAngle) {
+        this(bot, attackDistance, () -> damage, coolDown, effectual, viewAngle);
+    }
+
+    public AttackHook(IMovingEntity bot, double attackDistance, Supplier<Float> damage, long coolDown, int effectual, double viewAngle) {
         this(bot, null, attackDistance, damage, coolDown, effectual, viewAngle);
     }
 
     public AttackHook(IMovingEntity bot, Entity parentEntity, double attackDistance, float damage, long coolDown, int effectual, double viewAngle) {
+        this(bot, parentEntity, attackDistance, () -> damage, coolDown, effectual, viewAngle);
+    }
+
+    public AttackHook(IMovingEntity bot, Entity parentEntity, double attackDistance, Supplier<Float> damage, long coolDown, int effectual, double viewAngle) {
         super(bot);
         this.parentEntity = parentEntity;
         this.attackDistance = attackDistance;
@@ -48,7 +57,7 @@ public class AttackHook extends MovingEntityHook {
         this.coolDown = coolDown;
         this.effectual = effectual;
         this.viewAngle = viewAngle;
-        this.attackTaskSupplier = (target) -> new AttackTask(this.entity, this.parentEntity, target, this.damage, this.viewAngle, new Random().nextInt(10) < this.effectual, this.callbacks);
+        this.attackTaskSupplier = (target) -> new AttackTask(this.entity, this.parentEntity, target, this.damage.get(), this.viewAngle, new Random().nextInt(10) < this.effectual, this.callbacks);
     }
 
     public AttackHook setAttackTaskSupplier(AttackTaskSupplier attackTaskSupplier) {
@@ -57,10 +66,14 @@ public class AttackHook extends MovingEntityHook {
     }
 
     public float getDamage() {
-        return damage;
+        return damage.get();
     }
 
     public void setDamage(float damage) {
+        this.damage = () -> damage;
+    }
+
+    public void setDamage(Supplier<Float> damage) {
         this.damage = damage;
     }
 

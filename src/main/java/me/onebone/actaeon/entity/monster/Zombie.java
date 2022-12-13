@@ -17,7 +17,7 @@ public class Zombie extends Monster implements EntityAgeable, Fallable{
 	public Zombie(FullChunk chunk, CompoundTag nbt) {
 		super(chunk, nbt);
 		this.setTargetFinder(new AreaHaterTargetFinder(this, 500, 20000));
-		this.addHook("attack", new AttackHook(this, this.getAttackDistance(), this.getDamage(), 1000, 10, 180));
+		this.addHook("attack", new AttackHook(this, this.getAttackDistance(), this::getDamage, 1000, 10, 180));
 	}
 
 	@Override

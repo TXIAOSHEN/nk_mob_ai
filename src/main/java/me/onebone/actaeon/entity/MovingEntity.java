@@ -498,8 +498,12 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 	@Override
 	public void knockBack(Entity attacker, double damage, double x, double z, double base){
 		this.isKnockback = true;
+		super.knockBack(attacker, damage, x, z, base);
+	}
 
-		super.knockBack(attacker, damage, x, z, base / 2);
+	public void knockBack(Entity attacker, double damage, double x, double z, double baseH, double baseV) {
+		this.isKnockback = true;
+		super.knockBack(attacker, damage, x, z, baseH, baseV);
 	}
 
     public Router getRouter() {

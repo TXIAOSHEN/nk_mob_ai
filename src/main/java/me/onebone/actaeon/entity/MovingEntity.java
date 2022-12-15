@@ -36,9 +36,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 abstract public class MovingEntity extends EntityCreature implements IMovingEntity, InventoryHolder {
 
-	private static final String TAG_MAINHAND = "Mainhand";
-	private static final String TAG_OFFHAND = "Offhand";
-	private static final String TAG_ARMOR = "Armor";
+	public static final String TAG_MAINHAND = "Mainhand";
+	public static final String TAG_OFFHAND = "Offhand";
+	public static final String TAG_ARMOR = "Armor";
 
 	private boolean isKnockback = false;
 	private Router router;

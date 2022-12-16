@@ -48,7 +48,7 @@ public class Zombie extends Monster implements EntityAgeable, Fallable{
 		if (isBaby()){
 			return 0.51f;
 		}
-		return 0.7f;
+		return 1.62f;
 	}
 
 	@Override

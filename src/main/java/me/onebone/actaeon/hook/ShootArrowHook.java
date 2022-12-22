@@ -5,6 +5,7 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityLiving;
 import me.onebone.actaeon.entity.IMovingEntity;
 import me.onebone.actaeon.task.MovingEntityTask;
+import me.onebone.actaeon.task.ShootArrowTask;
 
 import java.util.Arrays;
 
@@ -20,6 +21,10 @@ public class ShootArrowHook extends MovingEntityHook {
 
     public interface ShootArrowTaskSupplier {
         MovingEntityTask get(IMovingEntity entity, Entity target, int ticks, double pitch);
+
+        static ShootArrowTaskSupplier ofDefault() {
+            return ShootArrowTask::new;
+        }
     }
 
     private long lastAttack = 0;
@@ -28,28 +33,32 @@ public class ShootArrowHook extends MovingEntityHook {
     private long coolDown;
     private final int ticks;
     private final double pitch;
-    private final ShootArrowTaskSupplier shootArrowTaskSupplier;
+    private ShootArrowTaskSupplier shootArrowTaskSupplier = ShootArrowTaskSupplier.ofDefault();
 
-    public ShootArrowHook(IMovingEntity entity, ShootArrowTaskSupplier shootArrowTaskSupplier) {
-        this(entity, shootArrowTaskSupplier, 10, 30, 2500);
+    public ShootArrowHook(IMovingEntity entity) {
+        this(entity, 10, 30, 2500);
     }
 
-    public ShootArrowHook(IMovingEntity entity, ShootArrowTaskSupplier shootArrowTaskSupplier, double minDistance, double maxDistance, long coolDown) {
-        this(entity, shootArrowTaskSupplier, minDistance, maxDistance, coolDown, 40);
+    public ShootArrowHook(IMovingEntity entity, double minDistance, double maxDistance, long coolDown) {
+        this(entity, minDistance, maxDistance, coolDown, 40);
     }
 
-    public ShootArrowHook(IMovingEntity entity, ShootArrowTaskSupplier shootArrowTaskSupplier, double minDistance, double maxDistance, long coolDown, int ticks) {
-        this(entity, shootArrowTaskSupplier, minDistance, maxDistance, coolDown, ticks, 5);
+    public ShootArrowHook(IMovingEntity entity, double minDistance, double maxDistance, long coolDown, int ticks) {
+        this(entity, minDistance, maxDistance, coolDown, ticks, 5);
     }
 
-    public ShootArrowHook(IMovingEntity entity, ShootArrowTaskSupplier shootArrowTaskSupplier, double minDistance, double maxDistance, long coolDown, int ticks, double pitch) {
+    public ShootArrowHook(IMovingEntity entity, double minDistance, double maxDistance, long coolDown, int ticks, double pitch) {
         super(entity);
-        this.shootArrowTaskSupplier = shootArrowTaskSupplier;
         this.minDistance = minDistance;
         this.maxDistance = maxDistance;
         this.coolDown = coolDown;
         this.ticks = ticks;
         this.pitch = pitch;
+    }
+
+    public ShootArrowHook setShootArrowTaskSupplier(ShootArrowTaskSupplier shootArrowTaskSupplier) {
+        this.shootArrowTaskSupplier = shootArrowTaskSupplier;
+        return this;
     }
 
     public long getCoolDown() {

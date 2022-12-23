@@ -233,9 +233,9 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 				if (this.canCollide() && this.canCollideWith(entity)) {
 					if (entity instanceof EntityHuman) this.onCollideWithPlayer((EntityHuman) entity);
 					if (autoCollide) {
-						Vector3 motion = this.subtract(entity);
-						this.motionX += motion.x / 2;
-						this.motionZ += motion.z / 2;
+						Vector3 motion = this.subtract(entity).normalize();
+						this.motionX += motion.x / 5;
+						this.motionZ += motion.z / 5;
 					}
 				}
 			}

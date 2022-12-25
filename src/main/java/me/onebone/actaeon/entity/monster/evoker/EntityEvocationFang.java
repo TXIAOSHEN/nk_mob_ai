@@ -1,16 +1,18 @@
 package me.onebone.actaeon.entity.monster.evoker;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.data.IntEntityData;
-import cn.nukkit.entity.data.ShortEntityData;
 import cn.nukkit.event.entity.EntityDamageByChildEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.level.ParticleEffect;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.particle.CriticalParticle;
+import cn.nukkit.level.sound.SoundEnum;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.AddEntityPacket;
-import cn.nukkit.network.protocol.EntityEventPacket;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * net.easecation.ecgrave.entity
@@ -21,15 +23,21 @@ import cn.nukkit.network.protocol.EntityEventPacket;
  * ===============
  */
 public class EntityEvocationFang extends Entity {
+
     public static final int NETWORK_ID = 103;
 
-    private Entity owner;
-    private float damage;
+    private final Entity owner;
+    private final float damage;
 
-    public EntityEvocationFang(FullChunk chunk, CompoundTag nbt, Entity owner, float damage) {
+    public EntityEvocationFang(FullChunk chunk, CompoundTag nbt, Entity owner) {
         super(chunk, nbt);
         this.owner = owner;
-        this.damage = damage;
+        this.setDataProperty(new IntEntityData(Entity.DATA_LIMITED_LIFE, 40));
+        if (nbt.contains("Damage")) {
+            this.damage = nbt.getFloat("Damage");
+        } else {
+            this.damage = 6f;
+        }
     }
 
     @Override
@@ -64,23 +72,22 @@ public class EntityEvocationFang extends Entity {
     public boolean onUpdate(int currentTick) {
         super.onUpdate(currentTick);
         if (this.isAlive()) {
-            this.setDataProperty(new ShortEntityData(80, this.age));
-            //Server.getInstance().getLogger().info("EntityEvocationFang " + this.getId() + " age=" + this.age);
-            if (this.age == 5) {
-                //this.setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_EVOKER_SPELL, true);
-            } else if (this.age == 20) {
+            if (this.age == this.getDataPropertyInt(Entity.DATA_LIMITED_LIFE) - 20) {
+                this.getLevel().addSound(this, SoundEnum.MOB_EVOCATION_FANGS_ATTACK);
+            } else if (this.age >= this.getDataPropertyInt(Entity.DATA_LIMITED_LIFE) - 10) {
                 Entity[] entities = this.getLevel().getNearbyEntities(this.getBoundingBox().grow(0.6, 2, 0.6));
                 for (Entity entity: entities) {
-                    if (entity != this.owner) entity.attack(new EntityDamageByChildEntityEvent(this.owner, this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage));
+                    EntityDamageByChildEntityEvent event = new EntityDamageByChildEntityEvent(this.owner, this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage);
+                    event.setKnockBack(0);
+                    if (entity != this.owner) {
+                        entity.attack(event);
+                    }
                 }
-
-                EntityEventPacket pk = new EntityEventPacket();
-                pk.eid = this.getId();
-                pk.event = 4;
-                Server.broadcastPacket(this.hasSpawned.values().toArray(new Player[0]), pk);
-            } else if (this.age >= 40) {
+                this.getLevel().addParticleEffect(this.add(0, 2, 0), ParticleEffect.EVOCATION_FANG);
+                for (int i = 0; i < 5; i++) {
+                    this.getLevel().addParticle(new CriticalParticle(this.add(ThreadLocalRandom.current().nextDouble() - 0.5, 1 + ThreadLocalRandom.current().nextDouble() * 1.2, ThreadLocalRandom.current().nextDouble() - 0.5)));
+                }
                 this.kill();
-                this.close();
             }
         }
 

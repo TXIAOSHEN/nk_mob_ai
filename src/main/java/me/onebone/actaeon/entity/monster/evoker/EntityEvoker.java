@@ -1,28 +1,25 @@
 package me.onebone.actaeon.entity.monster.evoker;
 
-import cn.nukkit.Player;
 import cn.nukkit.entity.EntityAgeable;
+import cn.nukkit.event.entity.EntityDamageByChildEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.sound.SoundEnum;
 import cn.nukkit.nbt.tag.CompoundTag;
-import cn.nukkit.network.protocol.BossEventPacket;
-import cn.nukkit.utils.TextFormat;
 import me.onebone.actaeon.entity.Climbable;
 import me.onebone.actaeon.entity.Fallable;
 import me.onebone.actaeon.entity.monster.Monster;
 import me.onebone.actaeon.target.AreaHaterTargetFinder;
 
-public class GraveEvokerBoss extends Monster implements EntityAgeable, Fallable, Climbable {
+import java.util.concurrent.ThreadLocalRandom;
+
+public class EntityEvoker extends Monster implements EntityAgeable, Fallable, Climbable {
 	public static final int NETWORK_ID = 104;
 
-	public GraveEvokerBoss(FullChunk chunk, CompoundTag nbt) {
+	public EntityEvoker(FullChunk chunk, CompoundTag nbt) {
 		super(chunk, nbt);
         this.setTargetFinder(new AreaHaterTargetFinder(this, 500, 20000));
-        this.setScale(1.2f);
-        this.setNameTag(TextFormat.BOLD.toString() + TextFormat.RED.toString() + "Evoker Boss");
-        this.setNameTagVisible();
-        this.setNameTagAlwaysVisible();
         this.addHook("attack", new EvokerAttackHook(this));
 	}
 
@@ -42,8 +39,13 @@ public class GraveEvokerBoss extends Monster implements EntityAgeable, Fallable,
     }
 
     @Override
+    public float getHeight() {
+        return 1.8f;
+    }
+
+    @Override
     public Item[] getDrops() {
-        return new Item[]{Item.get(Item.ENCHANTED_GOLDEN_APPLE)};
+        return new Item[0];
     }
 
     @Override
@@ -52,17 +54,18 @@ public class GraveEvokerBoss extends Monster implements EntityAgeable, Fallable,
     }
 
     @Override
-    public void spawnTo(Player player) {
-        super.spawnTo(player);
-        BossEventPacket pk = new BossEventPacket();
-        //pk.bossEid = this.getId();
-        //pk.type = BossEventPacket.TYPE_SHOW;
-        //pk.title = this.getNameTag();
-        player.dataPacket(pk);
+    public boolean attack(EntityDamageEvent source) {
+        if (source instanceof EntityDamageByChildEntityEvent && ((EntityDamageByChildEntityEvent) source).getChild() instanceof EntityEvocationFang) {
+            return false;
+        }
+        return source.getCause() != EntityDamageEvent.DamageCause.FALL && super.attack(source);
     }
 
     @Override
-    public boolean attack(EntityDamageEvent source) {
-        return source.getCause() != EntityDamageEvent.DamageCause.FALL && super.attack(source);
+    public boolean onUpdate(int currentTick) {
+        if (ThreadLocalRandom.current().nextInt(10) == 0) {
+            this.level.addSound(this, SoundEnum.MOB_EVOCATION_ILLAGER_AMBIENT);
+        }
+        return super.onUpdate(currentTick);
     }
 }

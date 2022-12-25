@@ -8,12 +8,8 @@ import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.plugin.PluginBase;
 import me.onebone.actaeon.entity.MovingEntity;
-import me.onebone.actaeon.entity.animal.Chicken;
-import me.onebone.actaeon.entity.animal.Cow;
-import me.onebone.actaeon.entity.animal.Pig;
-import me.onebone.actaeon.entity.animal.Sheep;
 import me.onebone.actaeon.entity.monster.Zombie;
-import me.onebone.actaeon.entity.monster.evoker.GraveEvokerBoss;
+import me.onebone.actaeon.entity.monster.evoker.EntityEvoker;
 
 public class Actaeon extends PluginBase implements Listener{
 
@@ -36,7 +32,7 @@ public class Actaeon extends PluginBase implements Listener{
 		//this.registerEntity("Chicken", Chicken.class);
 		//this.registerEntity("Pig", Pig.class);
 		this.registerEntity("Zombie", Zombie.class);
-		this.registerEntity("Evoker", GraveEvokerBoss.class);
+		this.registerEntity("Evoker", EntityEvoker.class);
 
 		Item.addCreativeItem(Item.get(Item.SPAWN_EGG, Zombie.NETWORK_ID));
 
@@ -51,7 +47,7 @@ public class Actaeon extends PluginBase implements Listener{
 		Item.addCreativeItem(Item.get(Item.SPAWN_EGG, 24));
 		Item.addCreativeItem(Item.get(Item.SPAWN_EGG, 25));
 		Item.addCreativeItem(Item.get(Item.SPAWN_EGG, 28));
-		Item.addCreativeItem(Item.get(Item.SPAWN_EGG, GraveEvokerBoss.NETWORK_ID));
+		Item.addCreativeItem(Item.get(Item.SPAWN_EGG, EntityEvoker.NETWORK_ID));
 		//this.getServer().getPluginManager().registerEvents(this, this);
 	}
 

@@ -13,12 +13,12 @@ import me.onebone.actaeon.hook.MovingEntityHook;
 public class EvokerAttackHook extends MovingEntityHook {
 
     private long lastAttack = 0;
-    private double attackDistance;
+    private final double attackDistance;
     private long coolDown;
     private float damage;
 
     public EvokerAttackHook(MovingEntity entity) {
-        this(entity, 10, 4, 1000);
+        this(entity, 10, 6, 5000);
     }
 
     public EvokerAttackHook(MovingEntity bot, double attackDistance, float damage, long coolDown) {

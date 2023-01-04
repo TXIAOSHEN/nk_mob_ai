@@ -25,6 +25,11 @@ public abstract class TargetFinder {
 		}
 	}
 
+	public void forceFind() {
+		this.find();
+		this.nextFind = System.currentTimeMillis() + this.interval;
+	}
+
 	protected abstract void find();
 
 }

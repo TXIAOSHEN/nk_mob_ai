@@ -6,13 +6,12 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityAgeable;
 import cn.nukkit.entity.EntityHuman;
 import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.AddEntityPacket;
 import cn.nukkit.network.protocol.UpdateAttributesPacket;
 import me.onebone.actaeon.entity.MovingEntity;
 
-abstract public class Monster extends MovingEntity implements EntityAgeable{
+abstract public class Monster extends MovingEntity implements EntityAgeable {
 
 	public Monster(FullChunk chunk, CompoundTag nbt){
 		super(chunk, nbt);
@@ -55,10 +54,10 @@ abstract public class Monster extends MovingEntity implements EntityAgeable{
 
 	@Override
 	public void onCollideWithPlayer(EntityHuman entityPlayer) {
-		if (!entityPlayer.getDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_INVISIBLE)) {
+		/*if (!entityPlayer.getDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_INVISIBLE)) {
 			Vector3 motion = this.subtract(entityPlayer);
 			this.motionX += motion.x / 2;
 			this.motionZ += motion.z / 2;
-		}
+		}*/
 	}
 }

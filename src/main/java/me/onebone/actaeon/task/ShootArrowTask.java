@@ -2,6 +2,7 @@ package me.onebone.actaeon.task;
 
 import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.data.LongEntityData;
 import cn.nukkit.entity.projectile.EntityArrow;
 import cn.nukkit.network.protocol.EntityEventPacket;
 import me.onebone.actaeon.entity.IMovingEntity;
@@ -48,11 +49,14 @@ public class ShootArrowTask extends MovingEntityTask {
             pk.eid = this.getEntity().getEntity().getId();
             pk.event = EntityEventPacket.USE_ITEM;
             Server.broadcastPacket(this.getEntity().getEntity().getViewers().values(), pk);
+            if (this.target != null) {
+                this.getEntity().getEntity().setDataProperty(new LongEntityData(Entity.DATA_TARGET_EID, this.target.getId()));
+            }
 
             if (fullTicks == 0) forceStop();
 
-            //this.getEntity().setMovementSpeed(0.08f);
-            this.getEntity().getEntity().setImmobile();
+            this.getEntity().getEntity().setMovementSpeed(0f);
+            // this.getEntity().getEntity().setImmobile();
         } else if (this.ticks <= 0) {
             // 射出弓箭
             EntityArrow arrow = new EntityArrow(
@@ -61,7 +65,8 @@ public class ShootArrowTask extends MovingEntityTask {
                     this.getEntity().getEntity()
             );
             arrow.spawnToAll();
-            this.getEntity().getEntity().setImmobile(false);
+            this.getEntity().getEntity().setMovementSpeed(0.1f);
+            this.getEntity().getEntity().setDataProperty(new LongEntityData(Entity.DATA_TARGET_EID, 0));
             this.getEntity().updateBotTask(null);
         } else {
             this.getEntity().setLookAtFront(false);
@@ -72,8 +77,8 @@ public class ShootArrowTask extends MovingEntityTask {
             double distance = this.getEntity().distance(this.target);
             double pitch = -Math.toDegrees(Math.asin((this.target.y - this.getEntity().getY()) / distance));
             this.getEntity().getEntity().setRotation(yaw, pitch - (1 - 1 / distance) * 5);
-            //this.getEntity().setMovementSpeed(0.08f);
-            this.getEntity().getEntity().setImmobile();
+            this.getEntity().getEntity().setMovementSpeed(0f);
+            // this.getEntity().getEntity().setImmobile();
         }
         this.ticks--;
     }
@@ -82,7 +87,7 @@ public class ShootArrowTask extends MovingEntityTask {
     public void forceStop() {
         this.getEntity().getEntity().setSprinting(false);
         this.getEntity().getEntity().setSneaking(false);
-        this.getEntity().getEntity().setImmobile(false);
+        this.getEntity().getEntity().setMovementSpeed(0.1f);
         this.getEntity().setLookAtFront(true);
     }
 

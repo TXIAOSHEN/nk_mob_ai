@@ -11,7 +11,7 @@ import me.onebone.actaeon.target.AreaHaterTargetFinder;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Zombie extends Monster implements EntityAgeable, Fallable{
+public class Zombie extends Monster implements EntityAgeable, Fallable {
 	public static final int NETWORK_ID = 32;
 
 	public Zombie(FullChunk chunk, CompoundTag nbt) {

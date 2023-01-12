@@ -49,7 +49,7 @@ public class AttackTask extends MovingEntityTask {
         double angle = Math.atan2(this.target.z - this.entity.getZ(), this.target.x - this.entity.getX());
         double yaw = ((angle * 180) / Math.PI) - 90;
         double min = this.entity.getYaw() - this.viewAngle / 2;
-        double max = this.entity.getY() + this.viewAngle / 2;
+        double max = this.entity.getYaw() + this.viewAngle / 2;
         boolean valid;
         if (min < 0) {
             valid = yaw > 360 + min || yaw < max;

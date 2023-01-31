@@ -24,7 +24,7 @@ public class EvokerAttackTask extends MovingEntityTask {
 
     private final Vector3 target;
     private final float damage;
-    private final boolean lineMode;
+    private boolean lineMode;
     private int index = 1;
 
     public EvokerAttackTask(IMovingEntity entity, Entity target, float damage) {
@@ -37,6 +37,11 @@ public class EvokerAttackTask extends MovingEntityTask {
         //如果目标离唤魔者的距离少于3格，唤魔者会以自身为中心召唤两圈尖牙。
         this.lineMode = this.getEntity().getEntity().distance(this.target) > 3;
         this.getEntity().getLevel().addSound(this.getEntity().getEntity(), SoundEnum.MOB_EVOCATION_ILLAGER_PREPARE_ATTACK);
+    }
+
+    public EvokerAttackTask setLineMode(boolean lineMode) {
+        this.lineMode = lineMode;
+        return this;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package me.onebone.actaeon.entity.animal;
 
 import cn.nukkit.entity.EntityAgeable;
+import cn.nukkit.entity.EntityID;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
@@ -8,9 +9,10 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import me.onebone.actaeon.target.AreaPlayerHoldTargetFinder;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Cow extends Animal implements EntityAgeable{
-	public static final int NETWORK_ID = 11;
+	public static final int NETWORK_ID = EntityID.COW;
 
 	public Cow(FullChunk chunk, CompoundTag nbt){
 		super(chunk, nbt);
@@ -50,7 +52,7 @@ public class Cow extends Animal implements EntityAgeable{
 
 	@Override
 	public Item[] getDrops(){
-		Random random = new Random();
+		Random random = ThreadLocalRandom.current();
 		Item leather = Item.get(Item.LEATHER, 0, random.nextInt(3));
 		Item meat = Item.get(Item.BEEF, 0, random.nextInt(3) + 1);
 		EntityDamageEvent cause = this.getLastDamageCause();

@@ -1,6 +1,7 @@
 package me.onebone.actaeon.entity.monster;
 
 import cn.nukkit.entity.EntityAgeable;
+import cn.nukkit.entity.EntityID;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.sound.SoundEnum;
@@ -12,7 +13,7 @@ import me.onebone.actaeon.target.AreaHaterTargetFinder;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Zombie extends Monster implements EntityAgeable, Fallable {
-	public static final int NETWORK_ID = 32;
+	public static final int NETWORK_ID = EntityID.ZOMBIE;
 
 	public Zombie(FullChunk chunk, CompoundTag nbt) {
 		super(chunk, nbt);

@@ -5,6 +5,7 @@ import me.onebone.actaeon.entity.IMovingEntity;
 import me.onebone.actaeon.route.AdvancedRouteFinder;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * StrollingTargetFinder
@@ -16,7 +17,7 @@ import java.util.Random;
  */
 public class StrollingTargetFinder extends TargetFinder {
 
-    public int needFind = new Random().nextInt(3);
+    public int needFind = ThreadLocalRandom.current().nextInt(3);
     public int needFindResetMax = 8;
     public int needFindResetUntil = 0;
     private final double radius;
@@ -27,7 +28,7 @@ public class StrollingTargetFinder extends TargetFinder {
     }
 
     public StrollingTargetFinder(IMovingEntity entity, double radius) {
-        this(entity, radius, 1000 * (new Random().nextInt(2) + 2));
+        this(entity, radius, 1000 * (ThreadLocalRandom.current().nextInt(2) + 2));
     }
 
     public StrollingTargetFinder(IMovingEntity entity, double radius, long inter) {
@@ -37,8 +38,8 @@ public class StrollingTargetFinder extends TargetFinder {
 
     @Override
     protected void find() {
-        Random random = new Random();
         if (this.needFind > 0) {
+            Random random = ThreadLocalRandom.current();
             Vector3 base = this.entity.getRealTarget() != null ? this.entity.getTarget() : this.getEntity().getPosition();
             //for (int i = 0; i < 5; i++) {
                 double r = random.nextDouble() * 360;

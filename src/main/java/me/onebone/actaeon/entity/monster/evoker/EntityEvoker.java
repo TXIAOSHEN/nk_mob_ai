@@ -1,6 +1,7 @@
 package me.onebone.actaeon.entity.monster.evoker;
 
 import cn.nukkit.entity.EntityAgeable;
+import cn.nukkit.entity.EntityID;
 import cn.nukkit.event.entity.EntityDamageByChildEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
@@ -15,7 +16,7 @@ import me.onebone.actaeon.target.AreaHaterTargetFinder;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class EntityEvoker extends Monster implements EntityAgeable, Fallable, Climbable {
-	public static final int NETWORK_ID = 104;
+	public static final int NETWORK_ID = EntityID.EVOCATION_ILLAGER;
 
 	public EntityEvoker(FullChunk chunk, CompoundTag nbt) {
 		super(chunk, nbt);

@@ -33,13 +33,14 @@ abstract public class Animal extends MovingEntity implements EntityAgeable {
 		pk.speedY = (float) this.motionY;
 		pk.speedZ = (float) this.motionZ;
 		pk.metadata = this.dataProperties;
+		pk.attributes = new Attribute[]{
+				Attribute.getAttribute(Attribute.HEALTH).setMaxValue(this.getMaxHealth()).setValue(this.getHealth()),
+		};
 		player.dataPacket(pk);
 
 		UpdateAttributesPacket pk0 = new UpdateAttributesPacket();
 		pk0.entityId = this.getId();
-		pk0.entries = new Attribute[]{
-				Attribute.getAttribute(Attribute.HEALTH).setMaxValue(this.getMaxHealth()).setValue(this.getHealth()),
-		};
+		pk0.entries = pk.attributes;
 		player.dataPacket(pk0);
 
 		super.spawnTo(player);

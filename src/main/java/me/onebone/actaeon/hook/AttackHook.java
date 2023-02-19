@@ -8,6 +8,7 @@ import me.onebone.actaeon.task.MovingEntityTask;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 /**
@@ -57,7 +58,7 @@ public class AttackHook extends MovingEntityHook {
         this.coolDown = coolDown;
         this.effectual = effectual;
         this.viewAngle = viewAngle;
-        this.attackTaskSupplier = (target) -> new AttackTask(this.entity, this.parentEntity, target, this.damage.get(), this.viewAngle, new Random().nextInt(10) < this.effectual, this.callbacks);
+        this.attackTaskSupplier = (target) -> new AttackTask(this.entity, this.parentEntity, target, this.damage.get(), this.viewAngle, ThreadLocalRandom.current().nextInt(10) < this.effectual, this.callbacks);
     }
 
     public AttackHook setAttackTaskSupplier(AttackTaskSupplier attackTaskSupplier) {
@@ -113,7 +114,7 @@ public class AttackHook extends MovingEntityHook {
                         this.entity.updateBotTask(this.attackTaskSupplier.get(hate));
                     }
                     this.lastAttack = System.currentTimeMillis();
-                    if (this.jump && new Random().nextBoolean()) this.entity.jump();
+                    if (this.jump && ThreadLocalRandom.current().nextBoolean()) this.entity.jump();
                 }
             }
         }

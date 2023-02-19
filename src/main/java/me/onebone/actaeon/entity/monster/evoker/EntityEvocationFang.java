@@ -2,6 +2,7 @@ package me.onebone.actaeon.entity.monster.evoker;
 
 import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.EntityID;
 import cn.nukkit.entity.data.IntEntityData;
 import cn.nukkit.event.entity.EntityDamageByChildEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
@@ -12,6 +13,7 @@ import cn.nukkit.level.sound.SoundEnum;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.AddEntityPacket;
 
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -24,7 +26,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class EntityEvocationFang extends Entity {
 
-    public static final int NETWORK_ID = 103;
+    public static final int NETWORK_ID = EntityID.EVOCATION_FANG;
 
     private final Entity owner;
     private final float damage;
@@ -77,6 +79,17 @@ public class EntityEvocationFang extends Entity {
             } else if (this.age >= this.getDataPropertyInt(Entity.DATA_LIMITED_LIFE) - 10) {
                 Entity[] entities = this.getLevel().getNearbyEntities(this.getBoundingBox().grow(0.6, 2, 0.6));
                 for (Entity entity: entities) {
+                    if (!entity.isAlive()) {
+                        continue;
+                    }
+
+                    if (entity instanceof Player) {
+                        Player player = (Player) entity;
+                        if (player.isCreativeLike()) {
+                            continue;
+                        }
+                    }
+
                     EntityDamageByChildEntityEvent event = new EntityDamageByChildEntityEvent(this.owner, this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.damage);
                     event.setKnockBack(0);
                     if (entity != this.owner) {
@@ -84,8 +97,9 @@ public class EntityEvocationFang extends Entity {
                     }
                 }
                 this.getLevel().addParticleEffect(this.add(0, 2, 0), ParticleEffect.EVOCATION_FANG);
+                Random random = ThreadLocalRandom.current();
                 for (int i = 0; i < 5; i++) {
-                    this.getLevel().addParticle(new CriticalParticle(this.add(ThreadLocalRandom.current().nextDouble() - 0.5, 1 + ThreadLocalRandom.current().nextDouble() * 1.2, ThreadLocalRandom.current().nextDouble() - 0.5)));
+                    this.getLevel().addParticle(new CriticalParticle(this.add(random.nextDouble() - 0.5, 1 + random.nextDouble() * 1.2, random.nextDouble() - 0.5)));
                 }
                 this.kill();
             }

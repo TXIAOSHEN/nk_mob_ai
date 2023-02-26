@@ -38,23 +38,20 @@ public class Zombie extends Monster implements EntityAgeable, Fallable {
 
 	@Override
 	public float getHeight(){
-		if (isBaby()){
-			return 0.8f;
-		}
-		return 1.8f;
+		return 1.9f;
 	}
 
 	@Override
 	public float getEyeHeight(){
-		if (isBaby()){
-			return 0.51f;
-		}
 		return 1.62f;
 	}
 
 	@Override
 	public Item[] getDrops(){
-		return new Item[]{Item.get(Item.ROTTEN_FLESH)};
+		ThreadLocalRandom random = ThreadLocalRandom.current();
+		return new Item[]{
+				Item.get(Item.ROTTEN_FLESH, 0, random.nextInt(3)),
+		};
 	}
 
 	public double getAttackDistance() {

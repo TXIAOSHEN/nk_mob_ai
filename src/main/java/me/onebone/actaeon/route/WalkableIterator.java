@@ -3,6 +3,7 @@ package me.onebone.actaeon.route;
 import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.level.Level;
+import cn.nukkit.math.Mth;
 import cn.nukkit.math.Vector3;
 
 import java.util.*;
@@ -46,13 +47,13 @@ public class WalkableIterator implements Iterator<Block> {
     }
 
     private Vector3 getStartPos(Vector3 center, double xOffset) {
-        double angle = Math.atan2(this.direction.z, this.direction.x);
+        double angle = Mth.atan2(this.direction.z, this.direction.x);
         double yaw = (float) ((angle * 180) / Math.PI) - 90;
         double baseX = xOffset;
         double baseZ = 0;
         double a = Math.toRadians(yaw);
-        double x = baseX * Math.cos(a) - baseZ * Math.sin(a);
-        double z = baseX * Math.sin(a) + baseZ * Math.cos(a);
+        double x = baseX * Mth.cos(a) - baseZ * Mth.sin(a);
+        double z = baseX * Mth.sin(a) + baseZ * Mth.cos(a);
         return new Vector3(center.x + x, center.y, center.z + z);
     }
 

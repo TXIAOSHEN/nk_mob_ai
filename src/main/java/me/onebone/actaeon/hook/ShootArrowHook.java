@@ -1,5 +1,6 @@
 package me.onebone.actaeon.hook;
 
+import cn.nukkit.Difficulty;
 import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import me.onebone.actaeon.entity.IMovingEntity;
@@ -19,7 +20,7 @@ import java.util.Arrays;
 public class ShootArrowHook extends MovingEntityHook {
 
     public interface ShootArrowTaskSupplier {
-        MovingEntityTask get(IMovingEntity entity, Entity target, int ticks, double pitch);
+        MovingEntityTask get(IMovingEntity entity, Entity target, int ticks, double pitch, double pow, double uncertainty);
 
         static ShootArrowTaskSupplier ofDefault() {
             return ShootArrowTask::new;
@@ -33,6 +34,9 @@ public class ShootArrowHook extends MovingEntityHook {
     private final int ticks;
     private final double pitch;
     private ShootArrowTaskSupplier shootArrowTaskSupplier = ShootArrowTaskSupplier.ofDefault();
+
+    private double pow = 2;
+    private double uncertainty = 1;
 
     public ShootArrowHook(IMovingEntity entity) {
         this(entity, 2, 30, 5000);
@@ -82,7 +86,7 @@ public class ShootArrowHook extends MovingEntityHook {
                     try {
                         if (this.ticks == 0 || (this.entity.getEntity() != null && Arrays.stream(this.entity.getEntity().getLineOfSight((int) this.entity.distance(hate.getPosition().add(0, hate.getEyeHeight(), 0)))).noneMatch(Block::isSolid))) {  //可以直接看到目标
                             if (this.entity.getTask() == null) {
-                                this.entity.updateBotTask(this.shootArrowTaskSupplier.get(this.entity, hate, this.ticks, this.pitch));
+                                this.entity.updateBotTask(this.shootArrowTaskSupplier.get(this.entity, hate, this.ticks, this.pitch, pow, uncertainty));
                             }
                             this.lastAttack = System.currentTimeMillis();
                         }
@@ -92,5 +96,32 @@ public class ShootArrowHook extends MovingEntityHook {
                 }
             }
         }
+    }
+
+    public double getPow() {
+        return pow;
+    }
+
+    public ShootArrowHook setPow(double pow) {
+        this.pow = pow;
+        return this;
+    }
+
+    public double getUncertainty() {
+        return uncertainty;
+    }
+
+    public ShootArrowHook setUncertainty(double uncertainty) {
+        this.uncertainty = uncertainty;
+        return this;
+    }
+
+    public ShootArrowHook setUncertainty(Difficulty difficulty) {
+        setUncertainty(getDifficultyUncertainty(difficulty));
+        return this;
+    }
+
+    public static double getDifficultyUncertainty(Difficulty difficulty) {
+        return 16 - difficulty.ordinal() * 4;
     }
 }

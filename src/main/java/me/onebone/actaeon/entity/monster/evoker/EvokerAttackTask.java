@@ -3,6 +3,7 @@ package me.onebone.actaeon.entity.monster.evoker;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.data.IntEntityData;
 import cn.nukkit.level.sound.SoundEnum;
+import cn.nukkit.math.Mth;
 import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -82,8 +83,8 @@ public class EvokerAttackTask extends MovingEntityTask {
                 // 内圈5个尖牙，距离1，环绕成一圈
                 for (int i = 0; i < 5; i++) {
                     double angle = 2 * Math.PI / 5 * i;
-                    double x = this.getEntity().getX() + Math.cos(angle);
-                    double z = this.getEntity().getZ() + Math.sin(angle);
+                    double x = this.getEntity().getX() + Mth.cos(angle);
+                    double z = this.getEntity().getZ() + Mth.sin(angle);
                     double y = this.getEntity().getY();
                     for (int offset = 0; offset < 5; offset++) {
                         if (this.getEntity().getLevel().getBlock(new Vector3(x, y + offset, z)).isAir()) {
@@ -111,8 +112,8 @@ public class EvokerAttackTask extends MovingEntityTask {
                 // 外圈为8个尖牙，距离2，环绕成一圈
                 for (int i = 0; i < 8; i++) {
                     double angle = 2 * Math.PI / 8 * i;
-                    double x = this.getEntity().getX() + 2 * Math.cos(angle);
-                    double z = this.getEntity().getZ() + 2 * Math.sin(angle);
+                    double x = this.getEntity().getX() + 2 * Mth.cos(angle);
+                    double z = this.getEntity().getZ() + 2 * Mth.sin(angle);
                     double y = this.getEntity().getY();
                     for (int offset = 0; offset < 5; offset++) {
                         if (this.getEntity().getLevel().getBlock(new Vector3(x, y + offset, z)).isAir()) {

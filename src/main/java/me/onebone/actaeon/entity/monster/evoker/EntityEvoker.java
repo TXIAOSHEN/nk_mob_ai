@@ -45,6 +45,11 @@ public class EntityEvoker extends Monster implements EntityAgeable, Fallable, Cl
     }
 
     @Override
+    protected float getJumpPower() {
+        return 0.42f;
+    }
+
+    @Override
     public Item[] getDrops() {
         return new Item[0];
     }

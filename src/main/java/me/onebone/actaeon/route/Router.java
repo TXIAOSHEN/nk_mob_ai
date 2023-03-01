@@ -130,9 +130,9 @@ public class Router implements Iterator<Node> {
 	public boolean hasReachedNode(Vector3 vec) {
 		Vector3 cur = this.get().getVector3();
 
-		/*return NukkitMath.floorDouble(vec.x) ==  NukkitMath.floorDouble(cur.x)
-				&& NukkitMath.floorDouble(vec.y) == NukkitMath.floorDouble(cur.y)
-				&& NukkitMath.floorDouble(vec.z) == NukkitMath.floorDouble(cur.z);*/
+		/*return Mth.floor(vec.x) ==  Mth.floor(cur.x)
+				&& Mth.floor(vec.y) == Mth.floor(cur.y)
+				&& Mth.floor(vec.z) == Mth.floor(cur.z);*/
 		return vec.x == cur.x
 				//&& vec.y == cur.y
 				&& vec.z == cur.z;

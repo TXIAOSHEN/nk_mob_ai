@@ -5,6 +5,7 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.event.entity.EntityDamageByChildEntityEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.math.Mth;
 import cn.nukkit.network.protocol.EntityEventPacket;
 import me.onebone.actaeon.entity.IMovingEntity;
 
@@ -46,7 +47,7 @@ public class AttackTask extends MovingEntityTask {
 
     @Override
     public void onUpdate(int tick) {
-        double angle = Math.atan2(this.target.z - this.entity.getZ(), this.target.x - this.entity.getX());
+        double angle = Mth.atan2(this.target.z - this.entity.getZ(), this.target.x - this.entity.getX());
         double yaw = ((angle * 180) / Math.PI) - 90;
         double min = this.entity.getYaw() - this.viewAngle / 2;
         double max = this.entity.getYaw() + this.viewAngle / 2;

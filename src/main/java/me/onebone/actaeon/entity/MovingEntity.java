@@ -8,12 +8,13 @@ import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.inventory.InventoryHolder;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.Items;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.sound.SoundEnum;
 import cn.nukkit.math.AxisAlignedBB;
-import cn.nukkit.math.NukkitMath;
+import cn.nukkit.math.Mth;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -129,8 +130,12 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 
 	public void jump() {
 		if (this.onGround){
-			this.motionY = 0.35;
+			this.motionY = getJumpPower();
 		}
+	}
+
+	protected float getJumpPower() {
+		return 0.35f;
 	}
 
 	@Override
@@ -222,7 +227,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 						this.motionX = Math.min(Math.abs(vec.x - this.x), diffX / (diffX + diffZ) * this.getMovementSpeed()) * negX;
 						this.motionZ = Math.min(Math.abs(vec.z - this.z), diffZ / (diffX + diffZ) * this.getMovementSpeed()) * negZ;
 						if (this.lookAtFront) {
-							double angle = Math.atan2(vec.z - this.z, vec.x - this.x);
+							double angle = Mth.atan2(vec.z - this.z, vec.x - this.x);
 							this.setRotation((angle * 180) / Math.PI - 90, 0);
 						}
 					}
@@ -398,7 +403,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 				source.setDamage(-source.getFinalDamage() * armorPoints * 0.04f, EntityDamageEvent.DamageModifier.ARMOR);
 			}
 
-			source.setDamage(-source.getFinalDamage() * Math.min(NukkitMath.ceilFloat(Math.min(epf, 25) * ((float) ThreadLocalRandom.current().nextInt(50, 100) / 100)), 20) * 0.04f,
+			source.setDamage(-source.getFinalDamage() * Math.min(Mth.ceil(Math.min(epf, 25) * ((float) ThreadLocalRandom.current().nextInt(50, 100) / 100)), 20) * 0.04f,
 					EntityDamageEvent.DamageModifier.ARMOR_ENCHANTMENTS);
 
 			source.setDamage(-Math.min(this.getAbsorption(), source.getFinalDamage()), EntityDamageEvent.DamageModifier.ABSORPTION);

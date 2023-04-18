@@ -8,7 +8,6 @@ import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.inventory.InventoryHolder;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.Items;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
@@ -548,6 +547,10 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 
 	public void setAutoCollide(boolean autoCollide) {
 		this.autoCollide = autoCollide;
+	}
+
+	public void playAnimation(String animation) {
+		this.getViewers().values().forEach(p -> p.playAnimation(animation, this.getId()));
 	}
 }
 

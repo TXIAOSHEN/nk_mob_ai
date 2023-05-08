@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Router implements Iterator<Node> {
 
@@ -60,7 +61,7 @@ public class Router implements Iterator<Node> {
 	}
 
 	public void onTick() {
-		if (!this.isSearching() && System.currentTimeMillis() >= this.nextRouteFind) {
+		if (!this.isSearching() && System.currentTimeMillis() >= this.nextRouteFind && this.routeFinder != null) {
 			if (destination == null) return;
 			// 目的地没有变更，则不需要再次寻路
 			if (Position.fromObject(destination, destination.level).equals(lastDestination)) return;
@@ -94,6 +95,15 @@ public class Router implements Iterator<Node> {
 	public Router setRouteFinder(IRouteFinder routeFinder) {
 		this.routeFinder = routeFinder;
 		return this;
+	}
+
+	public Router setNodes(List<Node> nodes) {
+		this.nodes = nodes;
+		return this;
+	}
+
+	public Router setNodesVector3(List<Vector3> nodes) {
+		return this.setNodes(nodes.stream().map(Node::new).collect(Collectors.toList()));
 	}
 
 	/**

@@ -99,6 +99,8 @@ public class Router implements Iterator<Node> {
 
 	public Router setNodes(List<Node> nodes) {
 		this.nodes = nodes;
+		this.arrived = false;
+		this.current = 0;
 		return this;
 	}
 

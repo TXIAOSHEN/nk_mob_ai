@@ -74,7 +74,7 @@ public class AttackTask extends MovingEntityTask {
 
         EntityEventPacket pk = new EntityEventPacket();
         pk.eid = this.entity.getEntity().getId();
-        pk.event = 4;
+        pk.event = EntityEventPacket.ARM_SWING;
         Server.broadcastPacket(this.getEntity().getEntity().getViewers().values(), pk);
         this.entity.updateBotTask(null);
     }

@@ -199,7 +199,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 		if (!this.isImmobile()) {
 			this.movingEntityPart3Timing.startTiming();
 			// 如果未在寻路，并且有寻路路径，则控制实体前往下一个节点
-			if (this.routeLeading && !this.isKnockback && !this.router.isSearching() && this.router.hasRoute()) { // entity has route to go
+			if (this.routeLeading && (!this.isKnockback || this.getGravity() == 0) && !this.router.isSearching() && this.router.hasRoute()) { // entity has route to go
 				hasUpdate = true;
 
 				// 获取下一寻路的节点
@@ -225,6 +225,12 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 
 						this.motionX = Math.min(Math.abs(vec.x - this.x), diffX / (diffX + diffZ) * this.getMovementSpeed()) * negX;
 						this.motionZ = Math.min(Math.abs(vec.z - this.z), diffZ / (diffX + diffZ) * this.getMovementSpeed()) * negZ;
+						// 如果this.getGravity() == 0，则计算motionY
+						if (this.getGravity() == 0) {
+							double diffY = Math.pow(vec.y - this.y, 2);
+							int negY = vec.y - this.y < 0 ? -1 : 1;
+							this.motionY = Math.min(Math.abs(vec.y - this.y), diffY / (diffX + diffZ) * this.getMovementSpeed()) * negY;
+						}
 						if (this.lookAtFront) {
 							double angle = Mth.atan2(vec.z - this.z, vec.x - this.x);
 							this.setRotation((angle * 180) / Math.PI - 90, 0);
@@ -406,6 +412,10 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 					EntityDamageEvent.DamageModifier.ARMOR_ENCHANTMENTS);
 
 			source.setDamage(-Math.min(this.getAbsorption(), source.getFinalDamage()), EntityDamageEvent.DamageModifier.ABSORPTION);
+		}
+
+		if (source instanceof EntityDamageByEntityEvent) {
+			this.hooks.forEach((name, hook) -> hook.onDamage(source));
 		}
 
 		if (super.attack(source)) {

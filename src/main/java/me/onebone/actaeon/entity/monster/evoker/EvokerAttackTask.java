@@ -45,6 +45,10 @@ public class EvokerAttackTask extends MovingEntityTask {
         return this;
     }
 
+    public Vector3 getTarget() {
+        return target;
+    }
+
     @Override
     public void onUpdate(int tick) {
         if (this.lineMode) {

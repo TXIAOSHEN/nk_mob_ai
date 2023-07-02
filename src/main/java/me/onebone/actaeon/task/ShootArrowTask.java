@@ -70,6 +70,7 @@ public class ShootArrowTask extends MovingEntityTask {
             if (this.target != null) {
                 this.getEntity().getEntity().setDataProperty(new LongEntityData(Entity.DATA_TARGET_EID, this.target.getId()));
             }
+            this.getEntity().getEntity().setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_FACING_TARGET_TO_RANGE_ATTACK, true);
 
             if (fullTicks == 0) forceStop();
 
@@ -94,6 +95,7 @@ public class ShootArrowTask extends MovingEntityTask {
             arrow.spawnToAll();
             this.getEntity().getEntity().setMovementSpeed(0.1f);
             this.getEntity().getEntity().setDataProperty(new LongEntityData(Entity.DATA_TARGET_EID, 0));
+            this.getEntity().getEntity().setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_FACING_TARGET_TO_RANGE_ATTACK, false);
             this.getEntity().updateBotTask(null);
         } else {
             this.getEntity().setLookAtFront(false);

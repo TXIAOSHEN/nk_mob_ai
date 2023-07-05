@@ -35,6 +35,9 @@ abstract public class Monster extends MovingEntity implements EntityAgeable {
 		pk.x = (float) this.x;
 		pk.y = (float) this.y;
 		pk.z = (float) this.z;
+		pk.yaw = (float) this.yaw;
+		pk.pitch = (float) this.pitch;
+		pk.headYaw = (float) this.yaw;
 		pk.speedX = (float) this.motionX;
 		pk.speedY = (float) this.motionY;
 		pk.speedZ = (float) this.motionZ;

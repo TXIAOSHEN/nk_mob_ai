@@ -414,9 +414,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 			source.setDamage(-Math.min(this.getAbsorption(), source.getFinalDamage()), EntityDamageEvent.DamageModifier.ABSORPTION);
 		}
 
-		if (source instanceof EntityDamageByEntityEvent) {
-			this.hooks.forEach((name, hook) -> hook.onDamage(source));
-		}
+		this.hooks.forEach((name, hook) -> hook.onDamage(source));
 
 		if (super.attack(source)) {
 			Entity damager = null;

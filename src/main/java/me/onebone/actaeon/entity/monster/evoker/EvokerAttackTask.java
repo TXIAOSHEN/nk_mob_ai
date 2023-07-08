@@ -33,7 +33,7 @@ public class EvokerAttackTask extends MovingEntityTask {
         this.target = target.getPosition();
         this.damage = damage;
         entity.getEntity().setMovementSpeed(0);
-        this.getEntity().getEntity().setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_EVOKER_SPELL, true);
+        this.getEntity().getEntity().setDataFlag(Entity.DATA_FLAG_EVOKER_SPELL, true);
         this.getEntity().getEntity().setDataProperty(new IntEntityData(Entity.DATA_SPELL_CASTING_COLOR, new Color(97, 76, 86).getRGB()));
         //如果目标离唤魔者的距离少于3格，唤魔者会以自身为中心召唤两圈尖牙。
         this.lineMode = this.getEntity().getEntity().distance(this.target) > 3;
@@ -151,7 +151,7 @@ public class EvokerAttackTask extends MovingEntityTask {
     @Override
     public void forceStop() {
         entity.getEntity().setMovementSpeed(0.1f);
-        this.getEntity().getEntity().setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_EVOKER_SPELL, false);
+        this.getEntity().getEntity().setDataFlag(Entity.DATA_FLAG_EVOKER_SPELL, false);
     }
 
 }

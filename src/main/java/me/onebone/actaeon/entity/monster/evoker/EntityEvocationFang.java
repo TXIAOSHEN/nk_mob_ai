@@ -34,7 +34,7 @@ public class EntityEvocationFang extends Entity {
     public EntityEvocationFang(FullChunk chunk, CompoundTag nbt, Entity owner) {
         super(chunk, nbt);
         this.owner = owner;
-        this.setDataProperty(new IntEntityData(Entity.DATA_LIMITED_LIFE, 40));
+        this.setDataProperty(new IntEntityData(Entity.DATA_LIMITED_LIFE, 40), false);
         if (nbt.contains("Damage")) {
             this.damage = nbt.getFloat("Damage");
         } else {

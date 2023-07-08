@@ -17,7 +17,7 @@ abstract public class Animal extends MovingEntity implements EntityAgeable {
 
 	@Override
 	public boolean isBaby(){
-		return this.getDataFlag(DATA_FLAGS, Entity.DATA_FLAG_BABY);
+		return this.getDataFlag(Entity.DATA_FLAG_BABY);
 	}
 
 	@Override

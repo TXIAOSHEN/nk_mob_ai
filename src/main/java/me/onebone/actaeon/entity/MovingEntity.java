@@ -19,8 +19,6 @@ import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.network.protocol.UpdateAttributesPacket;
-import co.aikar.timings.Timing;
-import co.aikar.timings.TimingsManager;
 import me.onebone.actaeon.hook.MovingEntityHook;
 import me.onebone.actaeon.inventory.EntityArmorInventory;
 import me.onebone.actaeon.inventory.EntityEquipmentInventory;
@@ -55,20 +53,8 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 	private EntityEquipmentInventory equipmentInventory;
 	private EntityArmorInventory armorInventory;
 
-	private final Timing movingEntityTiming;
-	private final Timing movingEntityPart1Timing;
-	private final Timing movingEntityPart2Timing;
-	private final Timing movingEntityPart3Timing;
-	private final Timing movingEntityPart4Timing;
-
 	public MovingEntity(FullChunk chunk, CompoundTag nbt){
 		super(chunk, nbt);
-
-		this.movingEntityTiming = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate");
-		this.movingEntityPart1Timing = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate Part1");
-		this.movingEntityPart2Timing = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate Part2");
-		this.movingEntityPart3Timing = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate Part3");
-		this.movingEntityPart4Timing = TimingsManager.getTiming("MovingEntity<" + this.getClass().getSimpleName() + "> - onUpdate Part4");
 
 		this.router = new Router(this);
 		this.setImmobile(false);
@@ -139,9 +125,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 
 	@Override
 	public boolean onUpdate(int currentTick) {
-		this.movingEntityTiming.startTiming();
 		super.onUpdate(currentTick);
-		this.movingEntityTiming.stopTiming();
 		return true;
 	}
 
@@ -151,7 +135,6 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 			return false;
 		}
 
-		this.movingEntityPart1Timing.startTiming();
 		new ArrayList<>(this.hooks.values()).forEach(hook -> hook.onUpdate(Server.getInstance().getTick()));
 		if (this.task != null) this.task.onUpdate(Server.getInstance().getTick());
 
@@ -167,10 +150,6 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 		this.motionZ *= (1 - this.getDrag());
 		if (this.motionX < 0.001 && this.motionX > -0.001) this.motionX = 0;
 		if (this.motionZ < 0.001 && this.motionZ > -0.001) this.motionZ = 0;
-
-		this.movingEntityPart1Timing.stopTiming();
-
-		this.movingEntityPart2Timing.startTiming();
 
 		if (this.targetFinder != null) this.targetFinder.onUpdate();
 
@@ -194,10 +173,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 			hasUpdate = true;
 		}*/
 
-		this.movingEntityPart2Timing.stopTiming();
-
 		if (!this.isImmobile()) {
-			this.movingEntityPart3Timing.startTiming();
 			// 如果未在寻路，并且有寻路路径，则控制实体前往下一个节点
 			if (this.routeLeading && (!this.isKnockback || this.getGravity() == 0) && !this.router.isSearching() && this.router.hasRoute()) { // entity has route to go
 				hasUpdate = true;
@@ -250,10 +226,6 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 				}
 			}
 
-			this.movingEntityPart3Timing.stopTiming();
-
-			this.movingEntityPart4Timing.startTiming();
-
 			if((this.motionX != 0 || this.motionZ != 0) && this.isCollidedHorizontally){
 				this.jump();
 			}
@@ -267,7 +239,6 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 			} else {
 				this.isKnockback = false;
 			}
-			this.movingEntityPart4Timing.stopTiming();
 		}
 
 

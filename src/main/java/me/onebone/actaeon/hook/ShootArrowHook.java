@@ -35,7 +35,7 @@ public class ShootArrowHook extends MovingEntityHook {
     private final double pitch;
     private ShootArrowTaskSupplier shootArrowTaskSupplier = ShootArrowTaskSupplier.ofDefault();
 
-    private double pow = 2;
+    private double pow = 1.6;
     private double uncertainty = 1;
 
     public ShootArrowHook(IMovingEntity entity) {

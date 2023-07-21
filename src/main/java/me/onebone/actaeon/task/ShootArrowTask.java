@@ -27,7 +27,7 @@ public class ShootArrowTask extends MovingEntityTask {
     }
 
     public ShootArrowTask(IMovingEntity entity, Entity target, int ticks, double pitch) {
-        this(entity, target, ticks, pitch, 2);
+        this(entity, target, ticks, pitch, 1.6);
     }
 
     public ShootArrowTask(IMovingEntity entity, Entity target, int ticks, double pitch, double pow) {

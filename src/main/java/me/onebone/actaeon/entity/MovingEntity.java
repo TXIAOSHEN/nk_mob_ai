@@ -6,8 +6,10 @@ import cn.nukkit.block.BlockID;
 import cn.nukkit.entity.*;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.event.entity.EntityDamageEvent.DamageCause;
 import cn.nukkit.inventory.InventoryHolder;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemBlockID;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
@@ -392,7 +394,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 			return false;
 		}
 
-		if (source.getCause() != EntityDamageEvent.DamageCause.VOID && source.getCause() != EntityDamageEvent.DamageCause.CUSTOM && source.getCause() != EntityDamageEvent.DamageCause.MAGIC && source.getCause() != EntityDamageEvent.DamageCause.HUNGER) {
+		if (source.getCause() != EntityDamageEvent.DamageCause.VOID && source.getCause() != DamageCause.SUICIDE && source.getCause() != EntityDamageEvent.DamageCause.CUSTOM && source.getCause() != EntityDamageEvent.DamageCause.SONIC_BOOM && source.getCause() != EntityDamageEvent.DamageCause.HUNGER) {
 			int armorPoints = 0;
 			int epf = 0;
 //            int toughness = 0;
@@ -417,6 +419,10 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 		this.hooks.forEach((name, hook) -> hook.onDamage(source));
 
 		if (super.attack(source)) {
+			if (source.getCause() == DamageCause.SUICIDE) {
+				return true;
+			}
+
 			Entity damager = null;
 
 			if (source instanceof EntityDamageByEntityEvent) {
@@ -424,7 +430,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 			}
 
 			for (int slot = 0; slot < 4; slot++) {
-				Item armor = damageArmor(armorInventory.getItem(slot), damager);
+				Item armor = damageArmor(armorInventory.getItem(slot), source.getCause(), damager);
 				armorInventory.setItem(slot, armor, armor.getId() != BlockID.AIR);
 			}
 
@@ -465,11 +471,11 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 		return epf;
 	}
 
-	protected Item damageArmor(Item armor, Entity damager) {
+	protected Item damageArmor(Item armor, DamageCause cause, Entity damager) {
 		if (armor.hasEnchantments()) {
 			if (damager != null) {
 				for (Enchantment enchantment : armor.getEnchantments()) {
-					enchantment.doPostAttack(damager, this);
+					enchantment.doPostAttack(damager, this, cause);
 				}
 			}
 
@@ -481,7 +487,25 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 			}
 		}
 
-		if (armor.isUnbreakable() || armor.getMaxDurability() < 0) {
+		switch (cause) {
+			case VOID:
+			case MAGIC:
+			case WITHER:
+			case HUNGER:
+			case DROWNING:
+			case SUFFOCATION:
+			case SUICIDE:
+			case FIRE_TICK:
+			case FREEZE:
+			case TEMPERATURE:
+			case FALL:
+			case STALAGMITE:
+			case FLY_INTO_WALL:
+			case SONIC_BOOM:
+				return armor;
+		}
+
+		if (armor.isUnbreakable() || armor.getId() == Item.SKULL || armor.getId() == ItemBlockID.CARVED_PUMPKIN || armor.getId() == Item.ELYTRA || armor.getMaxDurability() < 0) {
 			return armor;
 		}
 

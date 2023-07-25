@@ -245,9 +245,10 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 				if (this.canCollide() && this.canCollideWith(entity)) {
 					if (entity instanceof EntityHuman) this.onCollideWithPlayer((EntityHuman) entity);
 					if (autoCollide) {
+						double collisionFactor = this.getEntityCollisionFactor(entity);
 						Vector3 motion = this.subtract(entity).normalize();
-						this.motionX += motion.x / 5;
-						this.motionZ += motion.z / 5;
+						this.motionX += motion.x * collisionFactor;
+						this.motionZ += motion.z * collisionFactor;
 					}
 				}
 			}
@@ -583,6 +584,13 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 
 	public void playAnimation(String animation) {
 		this.getViewers().values().forEach(p -> p.playAnimation(animation, this.getId()));
+	}
+
+	/**
+	 * 实体碰撞因数，数值越小被碰撞的影响越小
+	 */
+	public double getEntityCollisionFactor(Entity entity) {
+		return 0.2f;
 	}
 }
 

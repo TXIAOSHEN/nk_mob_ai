@@ -1,7 +1,7 @@
 package me.onebone.actaeon.entity.monster;
 
 import cn.nukkit.Player;
-import cn.nukkit.entity.Attribute;
+import cn.nukkit.entity.attribute.Attribute;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityAgeable;
 import cn.nukkit.entity.EntityHuman;

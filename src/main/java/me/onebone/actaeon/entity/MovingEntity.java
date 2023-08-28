@@ -324,7 +324,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 		pk0.entries = new Attribute[]{
 				Attribute.getAttribute(Attribute.HEALTH).setMaxValue(this.getMaxHealth()).setValue(this.getHealth()),
 		};
-		this.getLevel().addChunkPacket(this.chunk.getX(), this.chunk.getZ(), pk0);
+		this.getLevel().addChunkPacket(this.getChunkX(), this.getChunkZ(), pk0);
 	}
 
 	@Override
@@ -336,7 +336,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 		pk0.entries = new Attribute[]{
 				Attribute.getAttribute(Attribute.HEALTH).setMaxValue(this.getMaxHealth()).setValue(this.getHealth()),
 		};
-		this.getLevel().addChunkPacket(this.chunk.getX(), this.chunk.getZ(), pk0);
+		this.getLevel().addChunkPacket(this.getChunkX(), this.getChunkZ(), pk0);
 	}
 
 	@Override

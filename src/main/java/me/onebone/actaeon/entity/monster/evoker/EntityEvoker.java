@@ -35,11 +35,6 @@ public class EntityEvoker extends Monster implements EntityAgeable, Fallable, Cl
     }
 
     @Override
-    public float getLength() {
-        return 0.6f;
-    }
-
-    @Override
     public float getHeight() {
         return 1.9f;
     }

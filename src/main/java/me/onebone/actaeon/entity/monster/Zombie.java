@@ -27,11 +27,6 @@ public class Zombie extends Monster implements EntityAgeable, Fallable {
 	}
 
 	@Override
-	public float getLength() {
-		return 0.6f;
-	}
-
-	@Override
 	protected float getGravity() {
 		return 0.05f;
 	}

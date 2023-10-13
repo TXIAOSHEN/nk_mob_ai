@@ -63,6 +63,9 @@ public class Router implements Iterator<Node> {
 	public void onTick() {
 		if (!this.isSearching() && System.currentTimeMillis() >= this.nextRouteFind && this.routeFinder != null) {
 			if (destination == null) return;
+			if (entity.getEntity().isImmobile()) {
+				return;
+			}
 			// 目的地没有变更，则不需要再次寻路
 			if (Position.fromObject(destination, destination.level).equals(lastDestination)) return;
 

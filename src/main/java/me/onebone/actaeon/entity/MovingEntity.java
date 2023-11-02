@@ -50,8 +50,9 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 	public boolean routeLeading = true;
 	private final Map<String, MovingEntityHook> hooks = new HashMap<>();
 	private MovingEntityTask task = null;
-	private boolean lookAtFront = true;
-	private boolean autoCollide = true;
+	protected boolean lookAtFront = true;
+	protected boolean autoCollide = true;
+	protected float collidePlayerToMove = 0f;
 
 	private EntityEquipmentInventory equipmentInventory;
 	private EntityArmorInventory armorInventory;
@@ -184,13 +185,15 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 				// 获取下一寻路的节点
 				Node node = this.router.get();
 				if (node != null) {
-					//Server.broadcastPacket(level.getPlayers().values().stream().toArray(Player[]::new), new cn.nukkit.level.particle.RedstoneParticle(node.getVector3(), 2).encode()[0]);
 					Vector3 vec = node.getVector3();
 					double diffX = Math.pow(vec.x - this.x, 2);
 					double diffZ = Math.pow(vec.z - this.z, 2);
+					double diffY = this.getGravity() == 0 ? Math.pow(vec.y - this.y, 2) : 0;
+
+					double totalDiff = diffX + diffZ + diffY; // 这里得到所有diff的和
 
 					// 已经达到了节点
-					if (diffX + diffZ == 0) {
+					if (totalDiff == 0) {
 						// 那么将节点调至下一个节点，如果没有下一个节点了，则到达目的地
 						if (this.router.hasNext()) {
 							this.router.next();
@@ -199,16 +202,21 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 							this.router.arrived();
 						}
 					} else {
-						int negX = vec.x - this.x < 0 ? -1 : 1;
-						int negZ = vec.z - this.z < 0 ? -1 : 1;
+						if (totalDiff > 0) {
+							double ratioX = diffX / totalDiff; // 使用各自的diff除以所有diff的和
+							double ratioZ = diffZ / totalDiff;
+							double ratioY = diffY / totalDiff;
 
-						this.motionX = Math.min(Math.abs(vec.x - this.x), diffX / (diffX + diffZ) * this.getMovementSpeed()) * negX;
-						this.motionZ = Math.min(Math.abs(vec.z - this.z), diffZ / (diffX + diffZ) * this.getMovementSpeed()) * negZ;
-						// 如果this.getGravity() == 0，则计算motionY
-						if (this.getGravity() == 0) {
-							double diffY = Math.pow(vec.y - this.y, 2);
+							int negX = vec.x - this.x < 0 ? -1 : 1;
+							int negZ = vec.z - this.z < 0 ? -1 : 1;
 							int negY = vec.y - this.y < 0 ? -1 : 1;
-							this.motionY = Math.min(Math.abs(vec.y - this.y), diffY / (diffX + diffZ) * this.getMovementSpeed()) * negY;
+
+							this.motionX = Math.min(Math.abs(vec.x - this.x), ratioX * this.getMovementSpeed()) * negX;
+							this.motionZ = Math.min(Math.abs(vec.z - this.z), ratioZ * this.getMovementSpeed()) * negZ;
+
+							if (this.getGravity() == 0) {
+								this.motionY = Math.min(Math.abs(vec.y - this.y), ratioY * this.getMovementSpeed()) * negY;
+							}
 						}
 						if (this.lookAtFront) {
 							double angle = Mth.atan2(vec.z - this.z, vec.x - this.x);
@@ -220,7 +228,14 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 
 			for (Entity entity: this.getLevel().getCollidingEntities(this.boundingBox)) {
 				if (this.canCollide() && this.canCollideWith(entity)) {
-					if (entity instanceof EntityHuman) this.onCollideWithPlayer((EntityHuman) entity);
+					if (entity instanceof EntityHuman) {
+						this.onCollideWithPlayer((EntityHuman) entity);
+						// 如果 collidePlayerToMove > 0，则应用运动向量来推动玩家
+						if (collidePlayerToMove > 0f) {
+							Vector3 playerMotion = this.subtract(entity).normalize().multiply(collidePlayerToMove);
+							entity.setMotion(playerMotion);
+						}
+					}
 					if (autoCollide) {
 						double collisionFactor = this.getEntityCollisionFactor(entity);
 						Vector3 motion = this.subtract(entity).normalize();
@@ -230,7 +245,7 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 				}
 			}
 
-			if((this.motionX != 0 || this.motionZ != 0) && this.isCollidedHorizontally){
+			if ((this.motionX != 0 || this.motionZ != 0) && this.isCollidedHorizontally){
 				this.jump();
 			}
 			this.move(this.motionX, this.motionY, this.motionZ);

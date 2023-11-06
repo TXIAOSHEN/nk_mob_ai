@@ -232,7 +232,8 @@ abstract public class MovingEntity extends EntityCreature implements IMovingEnti
 						this.onCollideWithPlayer((EntityHuman) entity);
 						// 如果 collidePlayerToMove > 0，则应用运动向量来推动玩家
 						if (collidePlayerToMove > 0f) {
-							Vector3 playerMotion = this.subtract(entity).normalize().multiply(collidePlayerToMove);
+							Vector3 playerMotion = entity.subtract(this).normalize().multiply(collidePlayerToMove);
+							playerMotion.y = 0;
 							entity.setMotion(playerMotion);
 						}
 					}
